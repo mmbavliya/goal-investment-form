@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ગોલ આધારિત રોકાણ ફોર્મ | Goal-Based Investment Form</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            gujarati: ['"Noto Sans Gujarati"', 'sans-serif'],
+            sans: ['"Plus Jakarta Sans"', '"Noto Sans Gujarati"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+              900: '#064e3b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Noto Sans Gujarati', 'Plus Jakarta Sans', sans-serif;
+    }
+    .goal-card {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .goal-card:hover {
+      border-color: #10b981;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.1), 0 8px 10px -6px rgba(16, 185, 129, 0.1);
+    }
+    .goal-card:has(input:checked),
+    .goal-card.active-selected {
+      border-color: #059669 !important;
+      background-color: #f0fdf4 !important;
+      box-shadow: 0 4px 14px -2px rgba(5, 150, 105, 0.18);
+    }
+    .goal-card:has(input:checked) .radio-dot,
+    .goal-card.active-selected .radio-dot {
+      border-color: #059669 !important;
+      background-color: #059669 !important;
+    }
+    .goal-card:has(input:checked) .radio-inner,
+    .goal-card.active-selected .radio-inner {
+      display: block !important;
+    }
+    .priority-card:has(input:checked) {
+      border-color: #059669 !important;
+      background-color: #f0fdf4 !important;
+    }
+    .risk-card:has(input:checked) {
+      border-color: #059669;
+      background-color: #f0fdf4;
+      box-shadow: 0 4px 6px -1px rgb(16 185 129 / 0.1);
+    }
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      .print-only {
+        display: block !important;
+      }
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        padding: 0 !important;
+      }
+      .shadow-xl, .shadow-md, .shadow-sm, .shadow-lg {
+        box-shadow: none !important;
+      }
+      .page-break {
+        page-break-before: always;
+      }
+    }
+    .print-only {
+      display: none;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+
+  <!-- Header / Navigation -->
+  <header class="bg-gradient-to-r from-emerald-800 via-teal-800 to-cyan-900 text-white shadow-lg no-print sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 py-3.5 sm:px-6 flex items-center justify-between">
+      <div class="flex items-center space-x-3 space-x-reverse">
+        <div class="p-2.5 bg-emerald-500/20 rounded-xl border border-emerald-400/30 backdrop-blur-sm">
+          <i data-lucide="target" class="w-6 h-6 text-emerald-300"></i>
+        </div>
+        <div>
+          <h1 class="text-lg sm:text-xl font-bold tracking-tight">ગોલ આધારિત રોકાણ પ્લાનર</h1>
+          <p class="text-xs text-emerald-200">Goal-Based Financial Planning & Investment Form</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-700/60 border border-emerald-400/30 text-emerald-200 text-xs font-semibold">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-300"></i>
+          <span>૧ યુઝર દીઠ ૧ સબમિશન</span>
+        </span>
+        <button type="button" onclick="handlePrintReport()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-xs sm:text-sm font-medium transition border border-white/20">
+          <i data-lucide="printer" class="w-4 h-4"></i>
+          <span>પ્રિન્ટ / PDF</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Intro Section (Web view) -->
+  <div class="max-w-5xl mx-auto px-4 pt-6 pb-2 no-print">
+    <div class="bg-gradient-to-br from-emerald-700 via-teal-700 to-emerald-900 rounded-2xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+      <div class="absolute -right-10 -bottom-10 opacity-10 pointer-events-none">
+        <i data-lucide="trending-up" class="w-80 h-80"></i>
+      </div>
+      <div class="relative z-10 max-w-3xl">
+        <div class="flex flex-wrap items-center gap-2 mb-3">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-400/20 border border-emerald-300/30 text-emerald-100">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-300"></i>
+            તમારા સપનાઓનું સચોટ નાણાકીય આયોજન
+          </span>
+          <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-white/15 border border-white/20 text-white">
+            <i data-lucide="lock" class="w-3 h-3 text-emerald-300"></i>
+            One-Time Submission Per User
+          </span>
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-bold leading-snug">તમારા ભવિષ્યના લક્ષ્યોને વાસ્તવિકતામાં બદલો</h2>
+        <p class="mt-2 text-sm sm:text-base text-emerald-100/90 leading-relaxed">
+          આ ફોર્મ દ્વારા તમે તમારા વિવિધ નાણાકીય લક્ષ્યો (બાળકનું શિક્ષણ, લગ્ન, નવું ઘર, નિવૃત્તિ વગેરે) માટે જરૂરી ચોક્કસ રકમ અને માસિક રોકાણ (SIP) નું આયોજન સરળતાથી કરી શકો છો.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Form Container -->
+  <main class="max-w-5xl mx-auto px-4 py-4 sm:py-6">
+    
+    <!-- One-Time Use / Already Submitted Notice Banner (Shown when user has submitted) -->
+    <div id="alreadySubmittedBanner" class="hidden mb-6 p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-emerald-900 via-teal-900 to-slate-900 border-2 border-emerald-500/50 shadow-xl text-white no-print">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div class="flex items-start sm:items-center gap-3.5">
+          <div class="p-3 bg-emerald-500/20 rounded-xl border border-emerald-400/40 text-emerald-300 shrink-0">
+            <i data-lucide="check-circle-2" class="w-6 h-6 text-emerald-400"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h4 class="font-bold text-base sm:text-lg text-emerald-200">તમારું ફોર્મ સબમિટ થઈ ગયું છે (Response Recorded)</h4>
+              <span class="px-2 py-0.5 text-[11px] font-bold rounded-full bg-emerald-500/30 text-emerald-300 border border-emerald-400/30">૧ યુઝર દીઠ ૧ વખત ઉપયોગ</span>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-300 mt-1">
+              દરેક વપરાશકર્તા માટે માત્ર ૧ વખત જ સબમિશન માન્ય છે. તમારો ગોલ પ્લાનિંગ રિપોર્ટ નીચે તૈયાર છે.
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 self-stretch sm:self-auto shrink-0">
+          <button type="button" onclick="scrollToSummaryReport()" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center justify-center gap-1.5">
+            <i data-lucide="file-text" class="w-4 h-4"></i>
+            <span>રિપોર્ટ જુઓ</span>
+          </button>
+          <button type="button" onclick="handlePrintReport()" class="w-full sm:w-auto px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm border border-white/20 transition flex items-center justify-center gap-1.5">
+            <i data-lucide="printer" class="w-4 h-4"></i>
+            <span>પ્રિન્ટ / PDF</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <form id="goalInvestmentForm" onsubmit="event.preventDefault(); onFormSubmit();" class="space-y-8">
+      
+      <!-- વિભાગ ૧: રોકાણકારની મૂળભૂત વિગતો -->
+      <section class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 sm:p-8 transition-all hover:shadow-md">
+        <div class="flex items-center gap-3 pb-5 border-b border-slate-100 mb-6">
+          <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-lg">
+            ૧
+          </div>
+          <div>
+            <h3 class="text-lg sm:text-xl font-bold text-slate-800">રોકાણકારની સામાન્ય માહિતી (Investor Basic Details)</h3>
+            <p class="text-xs sm:text-sm text-slate-500">કૃપા કરીને તમારી સંપર્ક અને વ્યક્તિગત માહિતી દાખલ કરો</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <!-- Full Name -->
+          <div class="sm:col-span-2 lg:col-span-1">
+            <label class="block text-sm font-semibold text-slate-700 mb-1.5" for="fullName">
+              પૂરું નામ <span class="text-emerald-600">*</span>
+              <span class="block text-xs font-normal text-slate-400">Full Name</span>
+            </label>
+            <div class="relative">
+              <i data-lucide="user" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
+              <input type="text" id="fullName" required placeholder="દા.ત. રમેશભાઈ પટેલ"
+                class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm transition">
+            </div>
+          </div>
+
+          <!-- Mobile Number -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1.5" for="phone">
+              મોબાઈલ નંબર <span class="text-emerald-600">*</span>
+              <span class="block text-xs font-normal text-slate-400">Mobile Number (૧૦ આંકડા)</span>
+            </label>
+            <div class="relative">
+              <i data-lucide="phone" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
+              <input type="tel" id="phone" required placeholder="98XXXXXXXX" pattern="[0-9]{10}"
+                class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm transition">
+            </div>
+          </div>
+
+          <!-- Email Address -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1.5" for="email">
+              ઈમેલ એડ્રેસ
+              <span class="block text-xs font-normal text-slate-400">Email Address (Optional)</span>
+            </label>
+            <div class="relative">
+              <i data-lucide="mail" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
+              <input type="email" id="email" placeholder="investor@example.com"
+                class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm transition">
+            </div>
+          </div>
+
+          <!-- Age -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1.5" for="age">
+              ઉંમર (વર્ષ) <span class="text-emerald-600">*</span>
+              <span class="block text-xs font-normal text-slate-400">Age (in Years)</span>
+            </label>
+            <div class="relative">
+              <i data-lucide="calendar" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
+              <input type="number" id="age" min="18" max="100" required placeholder="દા.ત. 35"
+                class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm transition">
+            </div>
+          </div>
+
+          <!-- Occupation -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1.5" for="occupation">
+              વ્યવસાય / રોજગાર <span class="text-emerald-600">*</span>
+              <span class="block text-xs font-normal text-slate-400">Occupation</span>
+            </label>
+            <select id="occupation" required
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white transition">
+              <option value="નોકરી (Salaried - Private/Govt)" selected>નોકરી (Salaried - Private/Govt)</option>
+              <option value="વેપાર / ધંધો (Business / Trader)">વેપાર / ધંધો (Business / Trader)</option>
+              <option value="પ્રોફેશનલ (Doctor, CA, Lawyer, etc.)">પ્રોફેશનલ (Doctor, CA, Lawyer, etc.)</option>
+              <option value="ખેતી / એગ્રીકલ્ચર (Agriculture)">ખેતી / એગ્રીકલ્ચર (Agriculture)</option>
+              <option value="ગૃહિણી (Homemaker)">ગૃહિણી (Homemaker)</option>
+              <option value="નિવૃત્ત (Retired)">નિવૃત્ત (Retired)</option>
+              <option value="અન્ય (Other)">અન્ય (Other)</option>
+            </select>
+          </div>
+
+          <!-- Annual Income Range -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1.5" for="annualIncome">
+              વાર્ષિક આવક <span class="text-emerald-600">*</span>
+              <span class="block text-xs font-normal text-slate-400">Annual Income Range</span>
+            </label>
+            <select id="annualIncome" required
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white transition">
+              <option value="₹ 3 લાખ સુધી (Up to ₹3 Lakhs)">₹ 3 લાખ સુધી (Up to ₹3 Lakhs)</option>
+              <option value="₹ 3 થી ₹ 6 લાખ (₹3 - ₹6 Lakhs)">₹ 3 થી ₹ 6 લાખ (₹3 - ₹6 Lakhs)</option>
+              <option value="₹ 6 થી ₹ 12 લાખ (₹6 - ₹12 Lakhs)" selected>₹ 6 થી ₹ 12 લાખ (₹6 - ₹12 Lakhs)</option>
+              <option value="₹ 12 થી ₹ 25 લાખ (₹12 - ₹25 Lakhs)">₹ 12 થી ₹ 25 લાખ (₹12 - ₹25 Lakhs)</option>
+              <option value="₹ 25 લાખથી વધુ (Above ₹25 Lakhs)">₹ 25 લાખથી વધુ (Above ₹25 Lakhs)</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- વિભાગ ૨: મુખ્ય નાણાકીય લક્ષ્ય અને પ્રાથમિકતા પસંદ કરો -->
+      <section class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 sm:p-8 transition-all hover:shadow-md">
+        <div class="flex items-center gap-3 pb-5 border-b border-slate-100 mb-6">
+          <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-lg">
+            ૨
+          </div>
+          <div>
+            <h3 class="text-lg sm:text-xl font-bold text-slate-800">મુખ્ય નાણાકીય લક્ષ્ય અને પ્રાથમિકતા (Select Goal & Priority)</h3>
+            <p class="text-xs sm:text-sm text-slate-500">તમે કયા સપના કે હેતુ માટે રોકાણ કરવા માંગો છો તે લક્ષ્ય પસંદ કરો</p>
+          </div>
+        </div>
+
+        <!-- Goal Selection Cards (Order: 3, 5, 1, 2, 4, 6) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="goalOptionsGrid">
+          
+          <!-- Card 1 (Original 3): Dream Home -->
+          <label class="relative flex flex-col justify-between p-5 rounded-2xl border-2 border-emerald-600 bg-emerald-50/40 cursor-pointer transition-all hover:border-emerald-500 goal-card active-selected">
+            <input type="radio" name="primaryGoal" value="નવું ઘર / ડ્રીમ હોમ (Dream House / Downpayment)" checked class="sr-only" onchange="onGoalChange('નવું ઘર / ડ્રીમ હોમ', 3500000, 7)">
+            <div>
+              <div class="flex items-start justify-between mb-3.5">
+                <div class="w-13 h-13 rounded-2xl bg-blue-50 border border-blue-200/70 p-2.5 flex items-center justify-center text-blue-600 shadow-sm shrink-0">
+                  <svg class="w-7 h-7" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M34 14V8H28V10.5L34 14Z" fill="#1e40af"/>
+                    <path d="M24 5L4 21H10V41H38V21H44L24 5Z" fill="#3b82f6"/>
+                    <path d="M20 41V28H28V41H20Z" fill="#1d4ed8"/>
+                    <rect x="14" y="22" width="6" height="6" rx="1.5" fill="#dbeafe"/>
+                    <rect x="28" y="22" width="6" height="6" rx="1.5" fill="#dbeafe"/>
+                    <circle cx="26" cy="35" r="1" fill="#fef08a"/>
+                  </svg>
+                </div>
+                <span class="w-5 h-5 rounded-full border-2 border-emerald-600 bg-emerald-600 flex items-center justify-center radio-dot transition">
+                  <span class="w-2 h-2 rounded-full bg-white radio-inner"></span>
+                </span>
+              </div>
+              <h4 class="font-bold text-slate-900 text-base leading-snug">નવું ઘર / ડ્રીમ હોમ</h4>
+              <p class="text-xs text-slate-500 mt-0.5">Dream House / Downpayment</p>
+            </div>
+            <div class="mt-4">
+              <span class="inline-block text-xs text-blue-700 font-medium bg-blue-50 border border-blue-100/80 rounded-lg px-2.5 py-1">૩ થી ૭ વર્ષ સમયગાળો</span>
+            </div>
+          </label>
+
+          <!-- Card 2 (Original 5): New Car / Travel -->
+          <label class="relative flex flex-col justify-between p-5 rounded-2xl border-2 border-slate-200 cursor-pointer transition-all hover:border-emerald-500 goal-card">
+            <input type="radio" name="primaryGoal" value="નવી કાર અથવા પ્રવાસ (Car Purchase / World Tour)" class="sr-only" onchange="onGoalChange('નવી કાર અથવા પ્રવાસ', 1200000, 4)">
+            <div>
+              <div class="flex items-start justify-between mb-3.5">
+                <div class="w-13 h-13 rounded-2xl bg-indigo-50 border border-indigo-200/70 p-2.5 flex items-center justify-center text-indigo-600 shadow-sm shrink-0">
+                  <svg class="w-7 h-7" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 25L14 13H34L39 25V35C39 36.1 38.1 37 37 37H35C33.9 37 33 36.1 33 35V33H15V35C15 36.1 14.1 37 13 37H11C9.9 37 9 36.1 9 35V25Z" fill="#6366f1"/>
+                    <path d="M12 24L15.5 15H32.5L36 24H12Z" fill="#e0e7ff"/>
+                    <circle cx="15.5" cy="28.5" r="2.5" fill="#ffffff"/>
+                    <circle cx="32.5" cy="28.5" r="2.5" fill="#ffffff"/>
+                    <path d="M26 6L28 9L38 9L30 13L33 18L24 14L19 18L20 13L14 11L24 10L26 6Z" fill="#a5b4fc"/>
+                  </svg>
+                </div>
+                <span class="w-5 h-5 rounded-full border-2 border-slate-300 bg-white flex items-center justify-center radio-dot transition">
+                  <span class="w-2 h-2 rounded-full bg-white hidden radio-inner"></span>
+                </span>
+              </div>
+              <h4 class="font-bold text-slate-900 text-base leading-snug">નવી કાર અથવા પ્રવાસ</h4>
+              <p class="text-xs text-slate-500 mt-0.5">Car Purchase / World Tour</p>
+            </div>
+            <div class="mt-4">
+              <span class="inline-block text-xs text-indigo-700 font-medium bg-indigo-50 border border-indigo-100/80 rounded-lg px-2.5 py-1">૧ થી ૫ વર્ષ સમયગાળો</span>
+            </div>
+          </label>
+
+          <!-- Card 3 (Original 1): Child Education -->
+          <label class="relative flex flex-col justify-between p-5 rounded-2xl border-2 border-slate-200 cursor-pointer transition-all hover:border-emerald-500 goal-card">
+            <input type="radio" name="primaryGoal" value="બાળકનું ઉચ્ચ શિક્ષણ (Child Higher Education)" class="sr-only" onchange="onGoalChange('બાળકનું ઉચ્ચ શિક્ષણ', 2500000, 10)">
+            <div>
+              <div class="flex items-start justify-between mb-3.5">
+                <div class="w-13 h-13 rounded-2xl bg-emerald-50 border border-emerald-200/70 p-2.5 flex items-center justify-center text-emerald-600 shadow-sm shrink-0">
+                  <svg class="w-7 h-7" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M24 6L4 17L24 28L44 17L24 6Z" fill="#059669"/>
+                    <path d="M10 23.5V33C10 37 16.27 41 24 41C31.73 41 38 37 38 33V23.5L24 31L10 23.5Z" fill="#10b981"/>
+                    <path d="M40 19V32C40 33 39 34 38 34C37 34 36 33 36 32V19.5L40 17.3V19Z" fill="#f59e0b"/>
+                    <circle cx="38" cy="34" r="3" fill="#d97706"/>
+                  </svg>
+                </div>
+                <span class="w-5 h-5 rounded-full border-2 border-slate-300 bg-white flex items-center justify-center radio-dot transition">
+                  <span class="w-2 h-2 rounded-full bg-white hidden radio-inner"></span>
+                </span>
+              </div>
+              <h4 class="font-bold text-slate-900 text-base leading-snug">બાળકનું ઉચ્ચ શિક્ષણ</h4>
+              <p class="text-xs text-slate-500 mt-0.5">Child Higher Education</p>
+            </div>
+            <div class="mt-4">
+              <span class="inline-block text-xs text-emerald-700 font-medium bg-emerald-50 border border-emerald-100/80 rounded-lg px-2.5 py-1">૫ થી ૧૫ વર્ષ સમયગાળો</span>
+            </div>
+          </label>
+
+          <!-- Card 4 (Original 2): Child Marriage -->
+          <label class="relative flex flex-col justify-between p-5 rounded-2xl border-2 border-slate-200 cursor-pointer transition-all hover:border-emerald-500 goal-card">
+            <input type="radio" name="primaryGoal" value="બાળકના લગ્ન માટે (Child Marriage Expense)" class="sr-only" onchange="onGoalChange('બાળકના લગ્ન માટે', 2000000, 12)">
+            <div>
+              <div class="flex items-start justify-between mb-3.5">
+                <div class="w-13 h-13 rounded-2xl bg-rose-50 border border-rose-200/70 p-2.5 flex items-center justify-center text-rose-600 shadow-sm shrink-0">
+                  <svg class="w-7 h-7" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M24 41.5C24 41.5 7 30.5 7 18C7 12 11.5 7.5 17.5 7.5C21 7.5 24 10 24 10C24 10 27 7.5 30.5 7.5C36.5 7.5 41 12 41 18C41 30.5 24 41.5 24 41.5Z" fill="#f43f5e"/>
+                    <circle cx="20" cy="22" r="7" stroke="#fef08a" stroke-width="2.5" fill="none"/>
+                    <circle cx="28" cy="22" r="7" stroke="#fbbf24" stroke-width="2.5" fill="none"/>
+                    <path d="M24 15L25.5 18L28.5 18.5L26 21L27 24L24 22.5L21 24L22 21L19.5 18.5L22.5 18L24 15Z" fill="#ffffff"/>
+                  </svg>
+                </div>
+                <span class="w-5 h-5 rounded-full border-2 border-slate-300 bg-white flex items-center justify-center radio-dot transition">
+                  <span class="w-2 h-2 rounded-full bg-white hidden radio-inner"></span>
+                </span>
+              </div>
+              <h4 class="font-bold text-slate-900 text-base leading-snug">બાળકના લગ્ન માટે</h4>
+              <p class="text-xs text-slate-500 mt-0.5">Child Marriage Expense</p>
+            </div>
+            <div class="mt-4">
+              <span class="inline-block text-xs text-rose-700 font-medium bg-rose-50 border border-rose-100/80 rounded-lg px-2.5 py-1">૭ થી ૧૫ વર્ષ સમયગાળો</span>
+            </div>
+          </label>
+
+          <!-- Card 5 (Original 4): Retirement -->
+          <label class="relative flex flex-col justify-between p-5 rounded-2xl border-2 border-slate-200 cursor-pointer transition-all hover:border-emerald-500 goal-card">
+            <input type="radio" name="primaryGoal" value="નિવૃત્તિ / પેન્શન ફંડ (Retirement Corpus)" class="sr-only" onchange="onGoalChange('નિવૃત્તિ / પેન્શન ફંડ', 10000000, 20)">
+            <div>
+              <div class="flex items-start justify-between mb-3.5">
+                <div class="w-13 h-13 rounded-2xl bg-amber-50 border border-amber-200/70 p-2.5 flex items-center justify-center text-amber-600 shadow-sm shrink-0">
+                  <svg class="w-7 h-7" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="24" cy="22" r="10" fill="#f59e0b"/>
+                    <path d="M24 4V8M24 36V40M6 22H10M38 22H42M11.27 9.27L14.1 12.1M33.9 31.9L36.73 34.73M11.27 34.73L14.1 31.9M33.9 12.1L36.73 9.27" stroke="#d97706" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M4 42C12 36 36 36 44 42H4Z" fill="#10b981"/>
+                    <path d="M20 38C20 33 28 33 28 38" stroke="#047857" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <span class="w-5 h-5 rounded-full border-2 border-slate-300 bg-white flex items-center justify-center radio-dot transition">
+                  <span class="w-2 h-2 rounded-full bg-white hidden radio-inner"></span>
+                </span>
+              </div>
+              <h4 class="font-bold text-slate-900 text-base leading-snug">નિવૃત્તિ / પેન્શન ફંડ</h4>
+              <p class="text-xs text-slate-500 mt-0.5">Retirement Corpus</p>
+            </div>
+            <div class="mt-4">
+              <span class="inline-block text-xs text-amber-800 font-medium bg-amber-50 border border-amber-100/80 rounded-lg px-2.5 py-1">૧૦ થી ૨૫ વર્ષ સમયગાળો</span>
+            </div>
+          </label>
+
+          <!-- Card 6 (Original 6): Wealth Creation -->
+          <label class="relative flex flex-col justify-between p-5 rounded-2xl border-2 border-slate-200 cursor-pointer transition-all hover:border-emerald-500 goal-card">
+            <input type="radio" name="primaryGoal" value="સંપત્તિ સર્જન / વેલ્થ ક્રિએશન (Long Term Wealth Building)" class="sr-only" onchange="onGoalChange('સંપત્તિ સર્જન / વેલ્થ ક્રિએશન', 5000000, 15)">
+            <div>
+              <div class="flex items-start justify-between mb-3.5">
+                <div class="w-13 h-13 rounded-2xl bg-teal-50 border border-teal-200/70 p-2.5 flex items-center justify-center text-teal-600 shadow-sm shrink-0">
+                  <svg class="w-7 h-7" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <ellipse cx="18" cy="36" rx="10" ry="4" fill="#0d9488"/>
+                    <ellipse cx="18" cy="30" rx="10" ry="4" fill="#14b8a6"/>
+                    <ellipse cx="18" cy="24" rx="10" ry="4" fill="#2dd4bf"/>
+                    <ellipse cx="32" cy="32" rx="9" ry="3.5" fill="#f59e0b"/>
+                    <ellipse cx="32" cy="26" rx="9" ry="3.5" fill="#fbbf24"/>
+                    <path d="M20 18L32 6M32 6H24M32 6V14" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M38 12L40 8L44 9L41 13L43 17L38 15L34 18L36 14L32 11L37 11L38 12Z" fill="#f59e0b"/>
+                  </svg>
+                </div>
+                <span class="w-5 h-5 rounded-full border-2 border-slate-300 bg-white flex items-center justify-center radio-dot transition">
+                  <span class="w-2 h-2 rounded-full bg-white hidden radio-inner"></span>
+                </span>
+              </div>
+              <h4 class="font-bold text-slate-900 text-base leading-snug">સંપત્તિ સર્જન / વેલ્થ ક્રિએશન</h4>
+              <p class="text-xs text-slate-500 mt-0.5">Long Term Wealth Building</p>
+            </div>
+            <div class="mt-4">
+              <span class="inline-block text-xs text-teal-700 font-medium bg-teal-50 border border-teal-100/80 rounded-lg px-2.5 py-1">૭+ વર્ષ સમયગાળો</span>
+            </div>
+          </label>
+
+        </div>
+
+        <!-- Goal Priority Level Selection -->
+        <div class="mt-6 pt-5 border-t border-slate-100">
+          <label class="block text-sm font-semibold text-slate-700 mb-2.5">
+            આ લક્ષ્યની પ્રાથમિકતા સ્તર (Goal Priority Level) <span class="text-emerald-600">*</span>
+          </label>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <label class="flex items-center gap-3 p-3.5 rounded-xl border-2 border-emerald-600 bg-emerald-50/40 cursor-pointer priority-card transition hover:border-emerald-500">
+              <input type="radio" name="goalPriority" value="🥇 ઉચ્ચ પ્રાથમિકતા (High Priority - Must Achieve)" checked class="text-emerald-600 focus:ring-emerald-500 w-4 h-4" onchange="onPriorityChange()">
+              <div>
+                <span class="font-bold text-slate-800 text-sm block">🥇 ઉચ્ચ પ્રાથમિકતા (High)</span>
+                <span class="text-xs text-slate-500">અતિ મહત્વપૂર્ણ - અનિવાર્ય લક્ષ્ય</span>
+              </div>
+            </label>
+            <label class="flex items-center gap-3 p-3.5 rounded-xl border-2 border-slate-200 cursor-pointer priority-card transition hover:border-emerald-500">
+              <input type="radio" name="goalPriority" value="🥈 મધ્યમ પ્રાથમિકતા (Medium Priority)" class="text-emerald-600 focus:ring-emerald-500 w-4 h-4" onchange="onPriorityChange()">
+              <div>
+                <span class="font-bold text-slate-800 text-sm block">🥈 મધ્યમ પ્રાથમિકતા (Medium)</span>
+                <span class="text-xs text-slate-500">મહત્વપૂર્ણ નાણાકીય લક્ષ્ય</span>
+              </div>
+            </label>
+            <label class="flex items-center gap-3 p-3.5 rounded-xl border-2 border-slate-200 cursor-pointer priority-card transition hover:border-emerald-500">
+              <input type="radio" name="goalPriority" value="🥉 સામાન્ય પ્રાથમિકતા (Low / Flexible)" class="text-emerald-600 focus:ring-emerald-500 w-4 h-4" onchange="onPriorityChange()">
+              <div>
+                <span class="font-bold text-slate-800 text-sm block">🥉 સામાન્ય પ્રાથમિકતા (Low)</span>
+                <span class="text-xs text-slate-500">સમય અનુસાર ફેરફાર શક્ય</span>
+              </div>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- વિભાગ ૩: લક્ષ્યની નાણાકીય વિગતો અને સમયગાળો -->
+      <section class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 sm:p-8 transition-all hover:shadow-md">
+        <div class="flex items-center gap-3 pb-5 border-b border-slate-100 mb-6">
+          <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-lg">
+            ૩
+          </div>
+          <div>
+            <h3 class="text-lg sm:text-xl font-bold text-slate-800">લક્ષ્યની નાણાકીય વિગતો (Goal Target & Time Horizon)</h3>
+            <p class="text-xs sm:text-sm text-slate-500">આ લક્ષ્ય પૂર્ણ કરવા જરૂરી રકમ અને સમયગાળાની માહિતી આપો</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          
+          <!-- લક્ષ્ય રકમ -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1.5" for="targetAmount">
+              આ લક્ષ્ય માટે હાલના મૂલ્ય મુજબ કેટલી રકમ જોઈએ? <span class="text-emerald-600">*</span>
+              <span class="block text-xs font-normal text-slate-400">Target Amount in Today's Value (₹)</span>
+            </label>
+            <div class="relative">
+              <span class="absolute left-3.5 top-2.5 font-bold text-slate-500">₹</span>
+              <input type="number" id="targetAmount" required min="10000" step="5000" value="3500000"
+                class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm font-medium transition"
+                oninput="updateCalculationPreview()">
+            </div>
+            <p class="text-xs text-emerald-700 mt-1 font-medium" id="targetAmountWords">₹ ૩૫,૦૦,૦૦૦ (૩૫ લાખ રૂપિયા)</p>
+          </div>
+
+          <!-- સમયગાળો (વર્ષ) -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1.5" for="targetYears">
+              આ લક્ષ્ય કેટલા વર્ષમાં પૂર્ણ કરવું છે? <span class="text-emerald-600">*</span>
+              <span class="block text-xs font-normal text-slate-400">Time Period (Years)</span>
+            </label>
+            <div class="relative">
+              <i data-lucide="clock" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
+              <input type="number" id="targetYears" required min="1" max="40" value="7"
+                class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm font-medium transition"
+                oninput="updateCalculationPreview()">
+            </div>
+            <p class="text-xs text-slate-500 mt-1">અંદાજિત <span id="targetMonthsCount" class="font-semibold text-slate-700">84</span> મહિના</p>
+          </div>
+
+          <!-- હાલમાં ઉપલબ્ધ બચત -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1.5" for="currentSavings">
+              આ લક્ષ્ય માટે હાલમાં કોઈ બચત/રોકાણ છે?
+              <span class="block text-xs font-normal text-slate-400">Current Savings for this Goal (₹)</span>
+            </label>
+            <div class="relative">
+              <span class="absolute left-3.5 top-2.5 font-bold text-slate-500">₹</span>
+              <input type="number" id="currentSavings" min="0" step="5000" value="100000"
+                class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm font-medium transition"
+                oninput="updateCalculationPreview()">
+            </div>
+            <p class="text-xs text-slate-500 mt-1">જો હાલમાં કોઈ રોકાણ ન હોય તો ૦ રાખો</p>
+          </div>
+        </div>
+
+        <!-- મોંઘવારી દર (Inflation Checkbox) -->
+        <div class="mt-5 p-4 rounded-xl bg-slate-50 border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <input type="checkbox" id="includeInflation" checked class="w-5 h-5 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500" onchange="updateCalculationPreview()">
+            <label for="includeInflation" class="text-sm font-medium text-slate-700 cursor-pointer">
+              ભવિષ્યની મોંઘવારી (Inflation @ 6%) ની ગણતરી ઉમેરવી છે?
+              <span class="block text-xs text-slate-400 font-normal">Add ~6% annual inflation to adjust future cost</span>
+            </label>
+          </div>
+          <span class="text-xs px-2.5 py-1 bg-amber-100 text-amber-800 rounded-full font-medium w-fit">વધુ સચોટ આયોજન માટે ભલામણ કરેલ</span>
+        </div>
+      </section>
+
+      <!-- વિભાગ ૪: જોખમ ક્ષમતા અને રોકાણ કરવાની ક્ષમતા -->
+      <section class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 sm:p-8 transition-all hover:shadow-md">
+        <div class="flex items-center gap-3 pb-5 border-b border-slate-100 mb-6">
+          <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-lg">
+            ૪
+          </div>
+          <div>
+            <h3 class="text-lg sm:text-xl font-bold text-slate-800">જોખમ ક્ષમતા અને રોકાણ પસંદગી (Risk Profile & Investment Preference)</h3>
+            <p class="text-xs sm:text-sm text-slate-500">તમારો રોકાણ અંગેનો દ્રષ્ટિકોણ અને માસિક રોકાણ ક્ષમતા જણાવો</p>
+          </div>
+        </div>
+
+        <!-- Risk Profile Selection -->
+        <div class="mb-6">
+          <label class="block text-sm font-semibold text-slate-700 mb-2.5">
+            બજારના ઉતાર-ચઢાવ અંગે તમારી માનસિકતા કેવી છે? (Risk Tolerance) <span class="text-emerald-600">*</span>
+          </label>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            
+            <!-- Conservative -->
+            <label class="p-4 rounded-xl border-2 border-slate-200 cursor-pointer hover:border-emerald-500 transition risk-card">
+              <input type="radio" name="riskProfile" value="સુરક્ષિત / રૂઢિચુસ્ત (Conservative - 8% to 10% Expected Return)" class="sr-only" onchange="updateRiskExpectedReturn(9)">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-bold text-slate-800 text-sm">સુરક્ષિત (Conservative)</span>
+                <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">~ ૮% થી ૧૦%</span>
+              </div>
+              <p class="text-xs text-slate-500 leading-relaxed">ઓછું જોખમ, મૂડીની સુરક્ષા પ્રાથમિકતા (Debt/Hybrid Funds)</p>
+            </label>
+
+            <!-- Moderate (Checked by default) -->
+            <label class="p-4 rounded-xl border-2 border-emerald-600 bg-emerald-50/50 cursor-pointer hover:border-emerald-500 transition risk-card">
+              <input type="radio" name="riskProfile" value="સંતુલિત (Moderate - 11% to 13% Expected Return)" checked class="sr-only" onchange="updateRiskExpectedReturn(12)">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-bold text-slate-800 text-sm">સંતુલિત (Moderate)</span>
+                <span class="text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-medium">~ ૧૧% થી ૧૩%</span>
+              </div>
+              <p class="text-xs text-slate-500 leading-relaxed">મધ્યમ જોખમ સાથે સ્થિર વૃદ્ધિ (Large Cap / Flexi Cap)</p>
+            </label>
+
+            <!-- Aggressive -->
+            <label class="p-4 rounded-xl border-2 border-slate-200 cursor-pointer hover:border-emerald-500 transition risk-card">
+              <input type="radio" name="riskProfile" value="આક્રમક / ઊંચી વૃદ્ધિ (Aggressive - 13% to 15%+ Expected Return)" class="sr-only" onchange="updateRiskExpectedReturn(14)">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-bold text-slate-800 text-sm">આક્રમક (Aggressive)</span>
+                <span class="text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded font-medium">~ ૧૩% થી ૧૫%+</span>
+              </div>
+              <p class="text-xs text-slate-500 leading-relaxed">લાંબા ગાળે મહત્તમ સંપત્તિ સર્જન (Mid & Small Cap Funds)</p>
+            </label>
+
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <!-- Monthly Budget Capacity -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1.5" for="monthlyBudget">
+              દર મહિને તમે આશરે કેટલું રોકાણ કરી શકો છો? <span class="text-emerald-600">*</span>
+              <span class="block text-xs font-normal text-slate-400">Monthly Investment Capacity (₹)</span>
+            </label>
+            <div class="relative">
+              <span class="absolute left-3.5 top-2.5 font-bold text-slate-500">₹</span>
+              <input type="number" id="monthlyBudget" required min="500" step="500" value="10000"
+                class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm transition">
+            </div>
+            <p class="text-xs text-slate-500 mt-1">દર મહિને સરળતાથી બચાવી શકાતી રકમ</p>
+          </div>
+
+          <!-- Preferred Investment Mode -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1.5" for="investmentMode">
+              રોકાણ કરવાની પસંદગીનો પ્રકાર (Investment Mode) <span class="text-emerald-600">*</span>
+              <span class="block text-xs font-normal text-slate-400">Preferred Mode</span>
+            </label>
+            <select id="investmentMode" required
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white transition">
+              <option value="દર મહિને વ્યવસ્થિત રોકાણ (Monthly SIP)" selected>દર મહિને વ્યવસ્થિત રોકાણ (Monthly SIP)</option>
+              <option value="એકસાથે રોકાણ (Lump-sum One-Time)">એકસાથે રોકાણ (Lump-sum One-Time)</option>
+              <option value="SIP + વાર્ષિક વધારો (SIP with Step-Up)">SIP + વાર્ષિક વધારો (SIP with Annual Step-Up)</option>
+              <option value="બંને (SIP + પ્રસંગોપાત લમ્પસમ)">બંને (SIP + પ્રસંગોપાત લમ્પસમ)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Additional Notes / Remarks -->
+        <div class="mt-5">
+          <label class="block text-sm font-semibold text-slate-700 mb-1.5" for="investorRemarks">
+            કોઈ ખાસ વિગત અથવા પ્રશ્ન?
+            <span class="block text-xs font-normal text-slate-400">Special Requirements / Notes (Optional)</span>
+          </label>
+          <textarea id="investorRemarks" rows="2" placeholder="દા.ત. ટેક્સ બચત (ELSS) ની જરૂરિયાત છે, અથવા અન્ય કોઈ મહત્વની નોંધ..."
+            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm transition"></textarea>
+        </div>
+      </section>
+
+      <!-- Submit & Action Buttons -->
+      <div id="formActionButtons" class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 no-print">
+        <button id="resetFormBtn" type="button" onclick="resetAllFields()" class="w-full sm:w-auto px-6 py-3 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-100 font-medium text-sm transition flex items-center justify-center gap-2">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span>ફોર્મ રીસેટ કરો (Reset)</span>
+        </button>
+
+        <button id="submitFormBtn" type="submit" class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold text-base shadow-lg shadow-emerald-600/30 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
+          <i data-lucide="calculator" class="w-5 h-5"></i>
+          <span id="submitBtnText">ગોલ પ્લાનિંગ રિપોર્ટ તૈયાર કરો (Generate Report)</span>
+        </button>
+      </div>
+
+    </form>
+
+    <!-- SECTION: ગોલ પ્લાનિંગ સારાંશ અને કેલ્ક્યુલેશન રિપોર્ટ (Result Section) -->
+    <div id="summaryReportSection" class="mt-12 space-y-6">
+      
+      <!-- Title Card -->
+      <div class="bg-white rounded-2xl shadow-lg border border-emerald-100 p-6 sm:p-8 overflow-hidden relative">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-md">ગોલ રિપોર્ટ</span>
+              <span class="text-xs text-slate-500" id="reportDateBadge">તારીખ: ૨૬-૦૮-૨૦૨૬</span>
+            </div>
+            <h3 class="text-2xl font-bold text-slate-900 mt-1">ગોલ આધારિત રોકાણ વિશ્લેષણ રિપોર્ટ</h3>
+            <p class="text-sm text-slate-500">Goal-Based Investment & SIP Recommendation Summary</p>
+          </div>
+          <button type="button" onclick="handlePrintReport()" class="no-print inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shadow-md transition">
+            <i data-lucide="file-down" class="w-4 h-4"></i>
+            <span>આ રિપોર્ટ ડાઉનલોડ / પ્રિન્ટ કરો</span>
+          </button>
+        </div>
+
+        <!-- Client & Goal Snapshot Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/70">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">રોકાણકારનું નામ</span>
+            <p class="font-bold text-slate-800 text-base" id="resInvestorName">રમેશભાઈ પટેલ</p>
+            <span class="text-xs text-slate-500" id="resInvestorContact">મો: 9876543210</span>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/70">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">પસંદ કરેલ લક્ષ્ય</span>
+              <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800" id="resGoalPriorityBadge">🥇 ઉચ્ચ પ્રાથમિકતા</span>
+            </div>
+            <p class="font-bold text-emerald-700 text-base" id="resGoalName">બાળકનું ઉચ્ચ શિક્ષણ</p>
+            <span class="text-xs text-slate-500" id="resGoalHorizon">સમયગાળો: ૧૦ વર્ષ (૧૨૦ મહિના)</span>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/70">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">લક્ષ્યની ભવિષ્યની રકમ</span>
+            <p class="font-bold text-slate-900 text-base" id="resFutureTargetAmount">₹ 44,77,119</p>
+            <span class="text-xs text-amber-700 font-medium" id="resInflationStatus">(૬% વાર્ષિક મોંઘવારી સાથે)</span>
+          </div>
+
+          <div class="p-4 rounded-xl bg-emerald-50/80 border border-emerald-200">
+            <span class="text-xs font-bold text-emerald-800 uppercase tracking-wider block mb-1">જરૂરી માસિક SIP</span>
+            <p class="font-extrabold text-emerald-700 text-xl" id="resRequiredMonthlySIP">₹ 18,500 / મહિને</p>
+            <span class="text-xs text-emerald-600 font-medium" id="resReturnRateText">અંદાજિત ૧૨% વળતર આધારે</span>
+          </div>
+        </div>
+
+        <!-- Detailed Financial Breakdown -->
+        <div class="mt-8 bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl p-6 sm:p-8">
+          <h4 class="text-lg font-bold mb-4 flex items-center gap-2">
+            <i data-lucide="pie-chart" class="w-5 h-5 text-emerald-400"></i>
+            <span>નાણાકીય ગણતરીનું વિશ્લેષણ (Financial Breakdown)</span>
+          </h4>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center sm:text-left">
+            <div class="p-4 rounded-xl bg-white/5 border border-white/10">
+              <span class="text-xs text-slate-300 block mb-1">તમારું કુલ અંદાજિત રોકાણ</span>
+              <p class="text-xl font-bold text-white" id="resTotalInvestmentAmount">₹ 22,20,000</p>
+              <span class="text-xs text-slate-400">દર મહિને SIP દ્વારા</span>
+            </div>
+
+            <div class="p-4 rounded-xl bg-white/5 border border-white/10">
+              <span class="text-xs text-slate-300 block mb-1">અંદાજિત મૂડી વૃદ્ધિ / વળતર</span>
+              <p class="text-xl font-bold text-emerald-400" id="resEstimatedReturns">₹ 22,57,119</p>
+              <span class="text-xs text-emerald-300/80">ચક્રવૃદ્ધિ વ્યાજની શક્તિ (Compound Power)</span>
+            </div>
+
+            <div class="p-4 rounded-xl bg-white/5 border border-white/10">
+              <span class="text-xs text-slate-300 block mb-1">લક્ષ્ય સમયે કુલ ફંડ (Maturity)</span>
+              <p class="text-xl font-bold text-teal-300" id="resTotalMaturityCorpus">₹ 44,77,119</p>
+              <span class="text-xs text-slate-300">તમારા લક્ષ્યની પૂર્તિ માટે</span>
+            </div>
+          </div>
+
+          <!-- Goal Feasibility Comparison -->
+          <div class="mt-6 p-4 rounded-xl bg-white/10 border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <span class="text-xs text-slate-300 font-medium">તમારી વર્તમાન માસિક બચત ક્ષમતા:</span>
+              <span class="font-bold text-white ml-1.5" id="resCurrentCapacity">₹ 10,000</span>
+            </div>
+            <div id="resBudgetGapBadge" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-400/30">
+              અંદાજિત ₹ 8,500 વધારાના રોકાણની જરૂર છે
+            </div>
+          </div>
+        </div>
+
+        <!-- Advisor Recommendation & Action Checklist -->
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          <div class="p-5 rounded-xl border border-slate-200 bg-slate-50/60">
+            <h5 class="font-bold text-slate-800 text-sm flex items-center gap-2 mb-3">
+              <i data-lucide="lightbulb" class="w-4 h-4 text-amber-500"></i>
+              <span>નાણાકીય સલાહકારની મહત્વપૂર્ણ ભલામણો</span>
+            </h5>
+            <ul class="space-y-2.5 text-xs sm:text-sm text-slate-600 leading-relaxed">
+              <li class="flex items-start gap-2">
+                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+                <span><strong>સમયસર શરૂઆત:</strong> રોકાણ જેટલું વહેલું શરૂ કરશો એટલો ચક્રવૃદ્ધિ વ્યાજનો વધુ ફાયદો મળશે.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+                <span><strong>સ્ટેપ-અપ SIP:</strong> દર વર્ષે આવક વધવાની સાથે SIP રકમમાં ૧૦% નો વધારો કરવો.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+                <span><strong>વાર્ષિક સમીક્ષા:</strong> દર વર્ષે તમારા લક્ષ્ય અને ફંડ પરફોર્મન્સની સમીક્ષા કરવી જરૂરી છે.</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="p-5 rounded-xl border border-slate-200 bg-slate-50/60 flex flex-col justify-between">
+            <div>
+              <h5 class="font-bold text-slate-800 text-sm flex items-center gap-2 mb-2">
+                <i data-lucide="shield-check" class="w-4 h-4 text-blue-500"></i>
+                <span>સંપર્ક અને સહી (Sign-off)</span>
+              </h5>
+              <p class="text-xs text-slate-500 mb-4">આ પ્લાનિંગ અંદાજિત ગણતરી પર આધારિત છે. રોકાણ બજારના જોખમોને આધીન છે.</p>
+            </div>
+            
+            <div class="pt-4 border-t border-slate-200 flex items-center justify-between text-xs text-slate-600">
+              <div>
+                <span class="block text-slate-400">રોકાણકારની સહી:</span>
+                <span class="font-semibold" id="resSignName">રમેશભાઈ પટેલ</span>
+              </div>
+              <div>
+                <span class="block text-slate-400">સલાહકારની સહી:</span>
+                <span class="font-semibold">...........................</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer (No Print) -->
+  <footer class="mt-12 py-8 bg-slate-900 text-slate-400 text-center text-xs no-print">
+    <div class="max-w-5xl mx-auto px-4 space-y-2">
+      <p class="font-medium text-slate-300">ગોલ આધારિત રોકાણ પ્લાનિંગ ફોર્મ (Gujarati Goal-Based Investment Form)</p>
+      <p class="text-slate-500">મ્યુચ્યુઅલ ફંડ અને ઇક્વિટી રોકાણ બજારના જોખમોને આધીન છે. રોકાણ કરતા પહેલા તમામ યોજના સંબંધિત દસ્તાવેજો કાળજીપૂર્વક વાંચો.</p>
+    </div>
+  </footer>
+
+  <!-- Master Leads & Excel Export Modal (No Print) -->
+  <div id="masterLeadsModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 no-print">
+    <div class="bg-white w-full max-w-5xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
+      
+      <!-- Modal Header -->
+      <div class="px-6 py-4 bg-gradient-to-r from-emerald-800 via-teal-800 to-slate-900 text-white flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="p-2 bg-emerald-500/20 rounded-xl border border-emerald-400/30">
+            <i data-lucide="table-properties" class="w-5 h-5 text-emerald-300"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-base sm:text-lg">માસ્ટર રોકાણકાર ડેટાબેઝ (Master Leads & Excel)</h3>
+            <p class="text-xs text-emerald-200">ગૂગલ ડ્રાઈવ અને એક્સેલ એનાલિસિસ માટે સેવ થયેલ રેકોર્ડ્સ</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeMasterLeadsModal()" class="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Action Toolbar -->
+      <div class="px-6 py-3.5 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-semibold text-slate-500">કુલ સબમિશન્સ:</span>
+          <span id="masterLeadsCount" class="text-xs font-bold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">0 રેકોર્ડ્સ</span>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" onclick="unlockFormForNewUser()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-md transition" title="વન-ટાઇમ લિમિટ રીસેટ કરો અને નવા યુઝર માટે ફોર્મ ઓપન કરો">
+            <i data-lucide="unlock" class="w-4 h-4"></i>
+            <span>નવા યુઝર માટે ફોર્મ અનલોક કરો</span>
+          </button>
+          <button type="button" onclick="syncAllLeadsToGoogleSheet()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md transition" title="તમામ રેકોર્ડ્સ Google Sheet માં અપલોડ કરો">
+            <i data-lucide="cloud-upload" class="w-4 h-4"></i>
+            <span>Google Sheet માં Sync કરો</span>
+          </button>
+          <button type="button" onclick="downloadMasterExcel()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span>એક્સેલ ડાઉનલોડ (.CSV)</span>
+          </button>
+          <button type="button" onclick="copyLeadsForGoogleSheets()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-md transition">
+            <i data-lucide="copy" class="w-4 h-4"></i>
+            <span>Google Sheets માં પેસ્ટ કરો</span>
+          </button>
+          <a href="https://drive.google.com" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-medium text-xs transition">
+            <i data-lucide="hard-drive" class="w-4 h-4 text-blue-600"></i>
+            <span>Google Drive</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Leads Data Table -->
+      <div class="overflow-x-auto p-4 flex-1">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-100/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+              <th class="py-2.5 px-3">#</th>
+              <th class="py-2.5 px-3">રોકાણકાર / તારીખ</th>
+              <th class="py-2.5 px-3">સંપર્ક નંબર</th>
+              <th class="py-2.5 px-3">પસંદ કરેલ લક્ષ્ય</th>
+              <th class="py-2.5 px-3">સમયગાળો</th>
+              <th class="py-2.5 px-3">જરૂરી SIP</th>
+              <th class="py-2.5 px-3">ભવિષ્યનું ફંડ</th>
+            </tr>
+          </thead>
+          <tbody id="masterLeadsTableBody" class="divide-y divide-slate-100">
+            <!-- Populated via JavaScript -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
+        <span>💡 આ ફાઇલને ગૂગલ ડ્રાઇવ (Google Sheets) માં અપલોડ કરીને ફિલ્ટર, ચાર્ટ્સ અને સોર્ટિંગ સરળતાથી કરી શકો છો.</span>
+        <button type="button" onclick="closeMasterLeadsModal()" class="px-4 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-medium transition">
+          બંધ કરો
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
