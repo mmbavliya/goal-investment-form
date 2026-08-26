@@ -199,7 +199,7 @@
             </label>
             <div class="relative">
               <i data-lucide="user" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
-              <input type="text" id="fullName" required placeholder="દા.ત. રમેશભાઈ પટેલ"
+              <input type="text" id="fullName" required placeholder="દા.ત. રમેશભાઈ પટેલ" oninput="onInvestorDetailsInput()"
                 class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm transition">
             </div>
           </div>
@@ -212,7 +212,7 @@
             </label>
             <div class="relative">
               <i data-lucide="phone" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
-              <input type="tel" id="phone" required placeholder="98XXXXXXXX" pattern="[0-9]{10}"
+              <input type="tel" id="phone" required placeholder="98XXXXXXXX" pattern="[0-9]{10}" maxlength="10" oninput="onInvestorDetailsInput()"
                 class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm transition">
             </div>
           </div>
@@ -238,7 +238,7 @@
             </label>
             <div class="relative">
               <i data-lucide="calendar" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
-              <input type="number" id="age" min="18" max="100" required placeholder="દા.ત. 35"
+              <input type="number" id="age" min="18" max="100" required placeholder="દા.ત. 35" oninput="onInvestorDetailsInput()"
                 class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm transition">
             </div>
           </div>
@@ -279,6 +279,27 @@
         </div>
       </section>
 
+      <!-- Lock / Unlock Status Notice for Sections 2-4 -->
+      <div id="calculatorLockNotice" class="p-4 sm:p-5 rounded-2xl bg-amber-50 border-2 border-amber-300 text-amber-900 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 transition-all duration-300">
+        <div class="flex items-center gap-3">
+          <div id="lockNoticeIcon" class="p-2.5 bg-amber-200/70 text-amber-800 rounded-xl shrink-0">
+            <i data-lucide="lock" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h4 id="lockNoticeTitle" class="font-bold text-sm sm:text-base text-amber-900">ગોલ પસંદગી અને SIP કેલ્ક્યુલેટર લૉક છે 🔒</h4>
+            <p id="lockNoticeSub" class="text-xs sm:text-sm text-amber-700 mt-0.5">
+              આગળ વધવા માટે કૃપા કરીને ઉપર <strong>વિભાગ ૧</strong> માં તમારું <strong>પૂરું નામ</strong> અને <strong>૧૦ આંકડાનો મોબાઈલ નંબર</strong> દાખલ કરો.
+            </p>
+          </div>
+        </div>
+        <span id="lockNoticeBadge" class="text-xs font-bold px-3 py-1 rounded-full bg-amber-200/80 text-amber-800 border border-amber-300 shrink-0">
+          વિભાગ ૧ જરૂરી છે
+        </span>
+      </div>
+
+      <!-- Gated Calculator Wrapper (Sections 2, 3, 4 + Submit) -->
+      <div id="gatedCalculatorSections" class="space-y-8 transition-all duration-300 opacity-40 pointer-events-none select-none">
+      
       <!-- વિભાગ ૨: મુખ્ય નાણાકીય લક્ષ્ય અને પ્રાથમિકતા પસંદ કરો -->
       <section class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 sm:p-8 transition-all hover:shadow-md">
         <div class="flex items-center gap-3 pb-5 border-b border-slate-100 mb-6">
@@ -663,10 +684,12 @@
         </button>
       </div>
 
+      </div> <!-- End #gatedCalculatorSections -->
+
     </form>
 
-    <!-- SECTION: ગોલ પ્લાનિંગ સારાંશ અને કેલ્ક્યુલેશન રિપોર્ટ (Result Section) -->
-    <div id="summaryReportSection" class="mt-12 space-y-6">
+    <!-- SECTION: ગોલ પ્લાનિંગ સારાંશ અને કેલ્ક્યુલેશન રિપોર્ટ (Result Section - Revealed after submit or for returning user) -->
+    <div id="summaryReportSection" class="hidden mt-12 space-y-6">
       
       <!-- Title Card -->
       <div class="bg-white rounded-2xl shadow-lg border border-emerald-100 p-6 sm:p-8 overflow-hidden relative">
