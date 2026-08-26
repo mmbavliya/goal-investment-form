@@ -1,0 +1,885 @@
+// Gujarati Goal-Based Investment Planner Application Logic
+
+// Live Google Sheet / Google Drive Webhook URL (Direct sync to Master Investor Leads)
+let GOOGLE_SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbylQZGGfd5EyfHUf-4CMYAjsbDQMdXNcuv2-Il_93jpy6Uuhrc2p_BiYpZjtg3XGkIiVA/exec"; 
+
+let currentExpectedReturn = 12; // Default 12% for Moderate
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+  updateCalculationPreview();
+  calculateAndShowSummary();
+  checkOneTimeSubmissionStatus();
+
+  // Hidden Advisor Shortcut: Press Ctrl + Shift + M to view Master Lead Database
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.shiftKey && (e.key === 'M' || e.key === 'm')) {
+      e.preventDefault();
+      openMasterLeadsModal();
+    }
+  });
+});
+
+// Check and enforce One-Time Submission per User
+function checkOneTimeSubmissionStatus() {
+  const isSubmitted = localStorage.getItem('goal_form_user_submitted') === 'true';
+  if (isSubmitted) {
+    const savedData = JSON.parse(localStorage.getItem('goal_form_submitted_user') || 'null');
+    lockFormAsSubmitted(savedData);
+  } else {
+    onInvestorDetailsInput();
+  }
+}
+
+// Dynamic Section 1 Completion Checker & Sections 2-4 Gatekeeper
+function onInvestorDetailsInput() {
+  const fullName = document.getElementById('fullName')?.value?.trim() || '';
+  const phone = document.getElementById('phone')?.value?.trim().replace(/\D/g, '') || '';
+  const isSubmitted = localStorage.getItem('goal_form_user_submitted') === 'true';
+
+  if (isSubmitted) return;
+
+  const gatedSection = document.getElementById('gatedCalculatorSections');
+  const lockNotice = document.getElementById('calculatorLockNotice');
+  const lockNoticeIcon = document.getElementById('lockNoticeIcon');
+  const lockNoticeTitle = document.getElementById('lockNoticeTitle');
+  const lockNoticeSub = document.getElementById('lockNoticeSub');
+  const lockNoticeBadge = document.getElementById('lockNoticeBadge');
+
+  const isValid = fullName.length >= 2 && phone.length === 10;
+
+  if (isValid) {
+    // Unlock sections 2-4
+    if (gatedSection) {
+      gatedSection.classList.remove('opacity-40', 'pointer-events-none', 'select-none');
+    }
+    if (lockNotice) {
+      lockNotice.className = 'p-4 sm:p-5 rounded-2xl bg-emerald-50 border-2 border-emerald-300 text-emerald-900 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 transition-all duration-300';
+    }
+    if (lockNoticeIcon) {
+      lockNoticeIcon.className = 'p-2.5 bg-emerald-200/70 text-emerald-800 rounded-xl shrink-0';
+      lockNoticeIcon.innerHTML = '<i data-lucide="check-circle" class="w-5 h-5"></i>';
+    }
+    if (lockNoticeTitle) {
+      lockNoticeTitle.textContent = 'રોકાણકાર વિગતો માન્ય છે! ✅ (Calculator Unlocked)';
+    }
+    if (lockNoticeSub) {
+      lockNoticeSub.innerHTML = 'હવે નીચે તમારા <strong>નાણાકીય લક્ષ્ય, સમયગાળો અને રોકાણ ક્ષમતા</strong> પસંદ કરો.';
+    }
+    if (lockNoticeBadge) {
+      lockNoticeBadge.className = 'text-xs font-bold px-3 py-1 rounded-full bg-emerald-200/80 text-emerald-800 border border-emerald-300 shrink-0';
+      lockNoticeBadge.textContent = 'અનલૉક થયેલ છે';
+    }
+  } else {
+    // Keep locked
+    if (gatedSection) {
+      gatedSection.classList.add('opacity-40', 'pointer-events-none', 'select-none');
+    }
+    if (lockNotice) {
+      lockNotice.className = 'p-4 sm:p-5 rounded-2xl bg-amber-50 border-2 border-amber-300 text-amber-900 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 transition-all duration-300';
+    }
+    if (lockNoticeIcon) {
+      lockNoticeIcon.className = 'p-2.5 bg-amber-200/70 text-amber-800 rounded-xl shrink-0';
+      lockNoticeIcon.innerHTML = '<i data-lucide="lock" class="w-5 h-5"></i>';
+    }
+    if (lockNoticeTitle) {
+      lockNoticeTitle.textContent = 'ગોલ પસંદગી અને SIP કેલ્ક્યુલેટર લૉક છે 🔒';
+    }
+    if (lockNoticeSub) {
+      lockNoticeSub.innerHTML = 'આગળ વધવા માટે કૃપા કરીને ઉપર <strong>વિભાગ ૧</strong> માં તમારું <strong>પૂરું નામ</strong> અને <strong>૧૦ આંકડાનો મોબાઈલ નંબર</strong> દાખલ કરો.';
+    }
+    if (lockNoticeBadge) {
+      lockNoticeBadge.className = 'text-xs font-bold px-3 py-1 rounded-full bg-amber-200/80 text-amber-800 border border-amber-300 shrink-0';
+      lockNoticeBadge.textContent = 'વિભાગ ૧ જરૂરી છે';
+    }
+  }
+
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+}
+
+// Lock form controls when submission is completed
+function lockFormAsSubmitted(data = null) {
+  // Show already submitted banner
+  const banner = document.getElementById('alreadySubmittedBanner');
+  if (banner) {
+    banner.classList.remove('hidden');
+  }
+
+  // Reveal summary report
+  const summaryEl = document.getElementById('summaryReportSection');
+  if (summaryEl) {
+    summaryEl.classList.remove('hidden');
+  }
+
+  // Unlock sections from blur
+  const gatedSection = document.getElementById('gatedCalculatorSections');
+  if (gatedSection) {
+    gatedSection.classList.remove('opacity-40', 'pointer-events-none', 'select-none');
+  }
+
+  // Hide lock notice
+  const lockNotice = document.getElementById('calculatorLockNotice');
+  if (lockNotice) {
+    lockNotice.classList.add('hidden');
+  }
+
+  // Populate saved data if available
+  if (data) {
+    if (data.fullName && document.getElementById('fullName')) document.getElementById('fullName').value = data.fullName;
+    if (data.phone && document.getElementById('phone')) document.getElementById('phone').value = data.phone;
+    if (data.email && document.getElementById('email')) document.getElementById('email').value = data.email;
+    if (data.age && document.getElementById('age')) document.getElementById('age').value = data.age;
+    if (data.occupation && document.getElementById('occupation')) document.getElementById('occupation').value = data.occupation;
+    if (data.annualIncome && document.getElementById('annualIncome')) document.getElementById('annualIncome').value = data.annualIncome;
+    if (data.targetAmount && document.getElementById('targetAmount')) document.getElementById('targetAmount').value = data.targetAmount;
+    if (data.targetYears && document.getElementById('targetYears')) document.getElementById('targetYears').value = data.targetYears;
+    if (data.currentSavings && document.getElementById('currentSavings')) document.getElementById('currentSavings').value = data.currentSavings;
+    if (data.monthlyBudget && document.getElementById('monthlyBudget')) document.getElementById('monthlyBudget').value = data.monthlyBudget;
+    if (data.investmentMode && document.getElementById('investmentMode')) document.getElementById('investmentMode').value = data.investmentMode;
+    if (data.remarks && document.getElementById('investorRemarks')) document.getElementById('investorRemarks').value = data.remarks;
+    
+    if (data.primaryGoal) {
+      const goalRadio = document.querySelector(`input[name="primaryGoal"][value="${data.primaryGoal}"]`);
+      if (goalRadio) {
+        goalRadio.checked = true;
+      }
+    }
+    if (data.goalPriority) {
+      const prioRadio = document.querySelector(`input[name="goalPriority"][value="${data.goalPriority}"]`);
+      if (prioRadio) prioRadio.checked = true;
+    }
+    if (data.riskProfile) {
+      const riskRadio = document.querySelector(`input[name="riskProfile"][value="${data.riskProfile}"]`);
+      if (riskRadio) riskRadio.checked = true;
+    }
+  }
+
+  // Disable form inputs
+  const form = document.getElementById('goalInvestmentForm');
+  if (form) {
+    const inputs = form.querySelectorAll('input, select, textarea');
+    inputs.forEach(el => {
+      el.disabled = true;
+      el.classList.add('bg-slate-100', 'cursor-not-allowed', 'opacity-85');
+    });
+  }
+
+  // Update Submit Button to locked state
+  const submitBtn = document.getElementById('submitFormBtn');
+  const submitText = document.getElementById('submitBtnText');
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.className = 'w-full sm:w-auto px-8 py-3.5 rounded-xl bg-slate-600 text-white font-bold text-base shadow cursor-not-allowed opacity-90 flex items-center justify-center gap-2';
+    if (submitText) {
+      submitText.textContent = '✅ ફોર્મ સબમિટ થઈ ગયું છે (Already Submitted)';
+    }
+  }
+
+  // Hide or disable reset button
+  const resetBtn = document.getElementById('resetFormBtn');
+  if (resetBtn) {
+    resetBtn.disabled = true;
+    resetBtn.classList.add('opacity-50', 'cursor-not-allowed');
+  }
+
+  updateCalculationPreview();
+  calculateAndShowSummary();
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+}
+
+// Advisor / Testing: Unlock form for a new client / user
+function unlockFormForNewUser(promptConfirm = true) {
+  if (promptConfirm && !confirm('શું તમે વન-ટાઇમ લિમિટ રીસેટ કરીને નવા રોકાણકાર માટે ફોર્મ અનલોક કરવા માંગો છો?')) {
+    return;
+  }
+
+  localStorage.removeItem('goal_form_user_submitted');
+  localStorage.removeItem('goal_form_submitted_user');
+
+  // Hide banner
+  const banner = document.getElementById('alreadySubmittedBanner');
+  if (banner) {
+    banner.classList.add('hidden');
+  }
+
+  // Hide summary report
+  const summaryEl = document.getElementById('summaryReportSection');
+  if (summaryEl) {
+    summaryEl.classList.add('hidden');
+  }
+
+  // Show lock notice
+  const lockNotice = document.getElementById('calculatorLockNotice');
+  if (lockNotice) {
+    lockNotice.classList.remove('hidden');
+  }
+
+  // Enable form inputs
+  const form = document.getElementById('goalInvestmentForm');
+  if (form) {
+    form.reset();
+    const inputs = form.querySelectorAll('input, select, textarea');
+    inputs.forEach(el => {
+      el.disabled = false;
+      el.classList.remove('bg-slate-100', 'cursor-not-allowed', 'opacity-85');
+    });
+  }
+
+  // Restore Submit Button
+  const submitBtn = document.getElementById('submitFormBtn');
+  const submitText = document.getElementById('submitBtnText');
+  if (submitBtn) {
+    submitBtn.disabled = false;
+    submitBtn.className = 'w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold text-base shadow-lg shadow-emerald-600/30 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2';
+    if (submitText) {
+      submitText.textContent = 'ગોલ પ્લાનિંગ રિપોર્ટ તૈયાર કરો (Generate Report)';
+    }
+  }
+
+  // Restore Reset Button
+  const resetBtn = document.getElementById('resetFormBtn');
+  if (resetBtn) {
+    resetBtn.disabled = false;
+    resetBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+  }
+
+  currentExpectedReturn = 12;
+  updateCalculationPreview();
+  calculateAndShowSummary();
+  onInvestorDetailsInput();
+
+  closeMasterLeadsModal();
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+
+  alert('✅ ફોર્મ સફળતાપૂર્વક અનલોક થઈ ગયું છે. હવે નવા રોકાણકાર માટે ફોર્મ ભરી શકાશે.');
+}
+
+// Check if mobile number has already been used in previous submissions
+function isPhoneNumberDuplicate(phone) {
+  if (!phone) return false;
+  const cleanPhone = String(phone).replace(/\D/g, '');
+  if (cleanPhone.length < 10) return false;
+
+  const existingLeads = JSON.parse(localStorage.getItem('goal_form_leads') || '[]');
+  return existingLeads.some(lead => {
+    const leadPhone = String(lead['મોબાઈલ નંબર'] || '').replace(/\D/g, '');
+    return leadPhone.includes(cleanPhone) || cleanPhone.includes(leadPhone);
+  });
+}
+
+// Smooth scroll to summary report
+function scrollToSummaryReport() {
+  const summaryEl = document.getElementById('summaryReportSection');
+  if (summaryEl) {
+    summaryEl.classList.remove('hidden');
+    summaryEl.scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+// Hidden Background Submission to Advisor's Email & Google Sheet / Drive
+async function sendHiddenSubmission() {
+  try {
+    const fullName = document.getElementById('fullName')?.value || 'N/A';
+    const phone = document.getElementById('phone')?.value || 'N/A';
+    const email = document.getElementById('email')?.value || 'N/A';
+    const age = document.getElementById('age')?.value || 'N/A';
+    const occupation = document.getElementById('occupation')?.value || 'N/A';
+    const annualIncome = document.getElementById('annualIncome')?.value || 'N/A';
+
+    const selectedGoal = document.querySelector('input[name="primaryGoal"]:checked')?.value || 'N/A';
+    const selectedPriority = document.querySelector('input[name="goalPriority"]:checked')?.value || 'N/A';
+    const targetAmount = document.getElementById('targetAmount')?.value || '0';
+    const targetYears = document.getElementById('targetYears')?.value || '0';
+    const currentSavings = document.getElementById('currentSavings')?.value || '0';
+    const includeInflation = document.getElementById('includeInflation')?.checked ? 'હા (Yes - 6% Inflation)' : 'ના (No)';
+
+    const riskProfile = document.querySelector('input[name="riskProfile"]:checked')?.value || 'N/A';
+    const monthlyBudget = document.getElementById('monthlyBudget')?.value || '0';
+    const investmentMode = document.getElementById('investmentMode')?.value || 'N/A';
+    const remarks = document.getElementById('investorRemarks')?.value || 'None';
+
+    const futureCorpus = document.getElementById('resFutureTargetAmount')?.textContent || 'N/A';
+    const requiredSIP = document.getElementById('resRequiredMonthlySIP')?.textContent || 'N/A';
+    const totalInvest = document.getElementById('resTotalInvestmentAmount')?.textContent || 'N/A';
+    const estReturns = document.getElementById('resEstimatedReturns')?.textContent || 'N/A';
+
+    const submissionData = {
+      _subject: `🎯 નવું ગોલ રોકાણ ફોર્મ લીડ: ${fullName} (${phone})`,
+      "રોકાણકારનું નામ": fullName,
+      "મોબાઈલ નંબર": phone,
+      "ઈમેલ": email,
+      "ઉંમર": `${age} વર્ષ`,
+      "વ્યવસાય": occupation,
+      "વાર્ષિક આવક": annualIncome,
+      "પસંદ કરેલ લક્ષ્ય": selectedGoal,
+      "લક્ષ્ય પ્રાથમિકતા": selectedPriority,
+      "લક્ષ્ય રકમ (હાલના મૂલ્ય)": `₹ ${Number(targetAmount).toLocaleString('en-IN')}`,
+      "સમયગાળો": `${targetYears} વર્ષ (${Math.round(targetYears * 12)} મહિના)`,
+      "હાલની બચત": `₹ ${Number(currentSavings).toLocaleString('en-IN')}`,
+      "મોંઘવારી ગણતરી": includeInflation,
+      "જોખમ ક્ષમતા (Risk)": riskProfile,
+      "માસિક રોકાણ ક્ષમતા": `₹ ${Number(monthlyBudget).toLocaleString('en-IN')}`,
+      "રોકાણ મોડ": investmentMode,
+      "વિશેષ નોંધ / પ્રશ્ન": remarks,
+      "--- નાણાકીય પરિણામ ---": "-------------------------",
+      "જરૂરી માસિક SIP": requiredSIP,
+      "લક્ષ્ય સમયે ભવિષ્યનું ફંડ": futureCorpus,
+      "કુલ SIP રોકાણ": totalInvest,
+      "અંદાજિત વળતર/નફો": estReturns,
+      "સબમિશન સમય": new Date().toLocaleString('gu-IN')
+    };
+
+    // Save locally as backup master database
+    const existingLeads = JSON.parse(localStorage.getItem('goal_form_leads') || '[]');
+    existingLeads.unshift({ ...submissionData, timestamp: new Date().toISOString() });
+    localStorage.setItem('goal_form_leads', JSON.stringify(existingLeads.slice(0, 500)));
+
+    // Direct Live Google Drive Sheet Webhook Sync (No email spam)
+    if (GOOGLE_SHEET_WEBHOOK_URL && GOOGLE_SHEET_WEBHOOK_URL.startsWith('http')) {
+      fetch(GOOGLE_SHEET_WEBHOOK_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8'
+        },
+        body: JSON.stringify(submissionData)
+      }).catch(err => {
+        console.warn("Google Sheet sync notice:", err);
+      });
+    }
+  } catch (err) {
+    console.error("Master sheet submission error:", err);
+  }
+}
+
+// Print Handler (Submits in background only if not already submitted, before printing)
+function handlePrintReport() {
+  const isSubmitted = localStorage.getItem('goal_form_user_submitted') === 'true';
+  if (!isSubmitted) {
+    sendHiddenSubmission();
+  }
+  setTimeout(() => {
+    window.print();
+  }, 150);
+}
+
+// Form Submission Handler with One-Time Enforcement per User
+function onFormSubmit() {
+  // Check 1: Has this device already submitted?
+  if (localStorage.getItem('goal_form_user_submitted') === 'true') {
+    alert('⚠️ તમે આ ફોર્મ પહેલેથી જ સબમિટ કરી ચૂક્યા છો.\n\nદરેક વપરાશકર્તા માટે માત્ર ૧ વખત જ સબમિશન માન્ય છે. તમારો રિપોર્ટ નીચે તૈયાર છે.');
+    scrollToSummaryReport();
+    return;
+  }
+
+  const phone = document.getElementById('phone')?.value?.trim() || '';
+
+  // Check 2: Has this phone number already been used?
+  if (phone && isPhoneNumberDuplicate(phone)) {
+    alert(`⚠️ આ મોબાઈલ નંબર (${phone}) પરથી ફોર્મ પહેલેથી જ સબમિટ થયેલ છે!\n\nદરેક વપરાશકર્તા દીઠ માત્ર એક જ વાર ફોર્મ ભરી શકાય છે.`);
+    scrollToSummaryReport();
+    return;
+  }
+
+  // Calculate & finalize report
+  calculateAndShowSummary();
+  
+  // Create snapshot of user's submission
+  const userSnapshot = {
+    fullName: document.getElementById('fullName')?.value || '',
+    phone: phone,
+    email: document.getElementById('email')?.value || '',
+    age: document.getElementById('age')?.value || '',
+    occupation: document.getElementById('occupation')?.value || '',
+    annualIncome: document.getElementById('annualIncome')?.value || '',
+    primaryGoal: document.querySelector('input[name="primaryGoal"]:checked')?.value || '',
+    goalPriority: document.querySelector('input[name="goalPriority"]:checked')?.value || '',
+    targetAmount: document.getElementById('targetAmount')?.value || '0',
+    targetYears: document.getElementById('targetYears')?.value || '0',
+    currentSavings: document.getElementById('currentSavings')?.value || '0',
+    riskProfile: document.querySelector('input[name="riskProfile"]:checked')?.value || '',
+    monthlyBudget: document.getElementById('monthlyBudget')?.value || '0',
+    investmentMode: document.getElementById('investmentMode')?.value || '',
+    remarks: document.getElementById('investorRemarks')?.value || '',
+    submittedAt: new Date().toISOString()
+  };
+
+  // Perform background submission
+  sendHiddenSubmission();
+
+  // Mark device as submitted and store snapshot
+  localStorage.setItem('goal_form_user_submitted', 'true');
+  localStorage.setItem('goal_form_submitted_user', JSON.stringify(userSnapshot));
+
+  // Lock form to prevent repeat submissions
+  lockFormAsSubmitted(userSnapshot);
+
+  // Friendly Gujarati confirmation alert
+  alert('🎉 ધન્યવાદ! તમારું ગોલ પ્લાનિંગ ફોર્મ સફળતાપૂર્વક સબમિટ થઈ ગયું છે.\n\nદરેક વપરાશકર્તા દીઠ ૧ સબમિશનની મર્યાદા અનુસાર તમારો ડેટા સુરક્ષિત સેવ થયો છે. તમારો ગોલ પ્લાનિંગ રિપોર્ટ નીચે તૈયાર છે.');
+
+  scrollToSummaryReport();
+}
+
+// Export Master Excel / CSV File (Ready for Google Drive & Microsoft Excel)
+function downloadMasterExcel() {
+  const leads = JSON.parse(localStorage.getItem('goal_form_leads') || '[]');
+  if (!leads || leads.length === 0) {
+    alert('હાલમાં કોઈ સેવ થયેલ લીડ્સ નથી. જ્યારે કોઈ ફોર્મ ભરશે ત્યારે અહીં માસ્ટર ડેટા આવી જશે.');
+    return;
+  }
+
+  const headers = [
+    'તારીખ & સમય',
+    'રોકાણકારનું નામ',
+    'મોબાઈલ નંબર',
+    'ઈમેલ',
+    'ઉંમર',
+    'વ્યવસાય',
+    'વાર્ષિક આવક',
+    'પસંદ કરેલ લક્ષ્ય',
+    'લક્ષ્ય પ્રાથમિકતા',
+    'લક્ષ્ય રકમ (₹)',
+    'સમયગાળો',
+    'હાલની બચત (₹)',
+    'મોંઘવારી ગણતરી',
+    'જોખમ ક્ષમતા',
+    'માસિક બચત ક્ષમતા (₹)',
+    'રોકાણ મોડ',
+    'જરૂરી માસિક SIP',
+    'ભવિષ્યનું ફંડ (Maturity)',
+    'કુલ રોકાણ',
+    'અંદાજિત વળતર',
+    'વિશેષ નોંધ'
+  ];
+
+  const rows = leads.map(l => [
+    `"${l['સબમિશન સમય'] || ''}"`,
+    `"${l['રોકાણકારનું નામ'] || ''}"`,
+    `"${l['મોબાઈલ નંબર'] || ''}"`,
+    `"${l['ઈમેલ'] || ''}"`,
+    `"${l['ઉંમર'] || ''}"`,
+    `"${l['વ્યવસાય'] || ''}"`,
+    `"${l['વાર્ષિક આવક'] || ''}"`,
+    `"${l['પસંદ કરેલ લક્ષ્ય'] || ''}"`,
+    `"${l['લક્ષ્ય પ્રાથમિકતા'] || ''}"`,
+    `"${l['લક્ષ્ય રકમ (હાલના મૂલ્ય)'] || ''}"`,
+    `"${l['સમયગાળો'] || ''}"`,
+    `"${l['હાલની બચત'] || ''}"`,
+    `"${l['મોંઘવારી ગણતરી'] || ''}"`,
+    `"${l['જોખમ ક્ષમતા (Risk)'] || ''}"`,
+    `"${l['માસિક રોકાણ ક્ષમતા'] || ''}"`,
+    `"${l['રોકાણ મોડ'] || ''}"`,
+    `"${l['જરૂરી માસિક SIP'] || ''}"`,
+    `"${l['લક્ષ્ય સમયે ભવિષ્યનું ફંડ'] || ''}"`,
+    `"${l['કુલ SIP રોકાણ'] || ''}"`,
+    `"${l['અંદાજિત વળતર/નફો'] || ''}"`,
+    `"${(l['વિશેષ નોંધ / પ્રશ્ન'] || '').replace(/"/g, '""')}"`
+  ]);
+
+  const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `Master_Investor_Leads_${new Date().toISOString().slice(0, 10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+// 1-Click Copy Data formatted for Google Sheets
+function copyLeadsForGoogleSheets() {
+  const leads = JSON.parse(localStorage.getItem('goal_form_leads') || '[]');
+  if (!leads || leads.length === 0) {
+    alert('કોઈ રેકોર્ડ્સ નથી.');
+    return;
+  }
+
+  const headers = [
+    'તારીખ & સમય',
+    'રોકાણકારનું નામ',
+    'મોબાઈલ નંબર',
+    'ઈમેલ',
+    'ઉંમર',
+    'વ્યવસાય',
+    'વાર્ષિક આવક',
+    'પસંદ કરેલ લક્ષ્ય',
+    'લક્ષ્ય પ્રાથમિકતા',
+    'લક્ષ્ય રકમ (હાલના મૂલ્ય)',
+    'સમયગાળો',
+    'હાલની બચત',
+    'મોંઘવારી ગણતરી',
+    'જોખમ ક્ષમતા',
+    'માસિક રોકાણ ક્ષમતા',
+    'રોકાણ મોડ',
+    'જરૂરી માસિક SIP',
+    'ભવિષ્યનું ફંડ',
+    'કુલ SIP રોકાણ',
+    'અંદાજિત વળતર',
+    'વિશેષ નોંધ'
+  ];
+
+  const rows = leads.map(l => [
+    l['સબમિશન સમય'] || '',
+    l['રોકાણકારનું નામ'] || '',
+    l['મોબાઈલ નંબર'] || '',
+    l['ઈમેલ'] || '',
+    l['ઉંમર'] || '',
+    l['વ્યવસાય'] || '',
+    l['વાર્ષિક આવક'] || '',
+    l['પસંદ કરેલ લક્ષ્ય'] || '',
+    l['લક્ષ્ય પ્રાથમિકતા'] || '',
+    l['લક્ષ્ય રકમ (હાલના મૂલ્ય)'] || '',
+    l['સમયગાળો'] || '',
+    l['હાલની બચત'] || '',
+    l['મોંઘવારી ગણતરી'] || '',
+    l['જોખમ ક્ષમતા (Risk)'] || '',
+    l['માસિક રોકાણ ક્ષમતા'] || '',
+    l['રોકાણ મોડ'] || '',
+    l['જરૂરી માસિક SIP'] || '',
+    l['લક્ષ્ય સમયે ભવિષ્યનું ફંડ'] || '',
+    l['કુલ SIP રોકાણ'] || '',
+    l['અંદાજિત વળતર/નફો'] || '',
+    (l['વિશેષ નોંધ / પ્રશ્ન'] || '').replace(/\t|\n/g, ' ')
+  ]);
+
+  const tsvContent = [headers.join('\t'), ...rows.map(e => e.join('\t'))].join('\n');
+  navigator.clipboard.writeText(tsvContent).then(() => {
+    alert('✅ તમામ રેકોર્ડ્સ ક્લિપબોર્ડમાં કોપી થઈ ગયા છે!\n\nહવે નવી Google Sheet ખુલશે, તેમાં Cell A1 પર ક્લિક કરીને માત્ર (Ctrl + V) દબાવો. બધો જ ડેટા સરસ રીતે ગોઠવાઈ જશે.');
+    window.open('https://sheets.new', '_blank');
+  }).catch(() => {
+    downloadMasterExcel();
+  });
+}
+
+// Sync All Past Leads to Google Sheet in 1 Click
+async function syncAllLeadsToGoogleSheet() {
+  const leads = JSON.parse(localStorage.getItem('goal_form_leads') || '[]');
+  if (!leads || leads.length === 0) {
+    alert('કોઈ સેવ થયેલ રેકોર્ડ્સ નથી.');
+    return;
+  }
+
+  if (!GOOGLE_SHEET_WEBHOOK_URL) {
+    alert('Google Sheet Webhook URL સેટ નથી.');
+    return;
+  }
+
+  let count = 0;
+  for (const lead of leads) {
+    try {
+      await fetch(GOOGLE_SHEET_WEBHOOK_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8'
+        },
+        body: JSON.stringify(lead)
+      });
+      count++;
+    } catch (err) {
+      console.warn("Sync notice:", err);
+    }
+  }
+
+  alert(`✅ સફળતાપૂર્વક ${count} રેકોર્ડ્સ તમારી Google Drive ની Master Sheet માં અપલોડ થઈ ગયા છે!\nતમારી Google Sheet રિફ્રેશ કરીને જુઓ.`);
+}
+
+// Open Master Leads Modal
+function openMasterLeadsModal() {
+  const modal = document.getElementById('masterLeadsModal');
+  const leads = JSON.parse(localStorage.getItem('goal_form_leads') || '[]');
+  const tableBody = document.getElementById('masterLeadsTableBody');
+  const countEl = document.getElementById('masterLeadsCount');
+
+  if (countEl) {
+    countEl.textContent = `${leads.length} રેકોર્ડ્સ`;
+  }
+
+  if (tableBody) {
+    if (leads.length === 0) {
+      tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-slate-400 text-sm">હજુ સુધી કોઈ રેકોર્ડ્સ સેવ થયા નથી.</td></tr>`;
+    } else {
+      tableBody.innerHTML = leads.map((l, index) => `
+        <tr class="border-b border-slate-100 hover:bg-slate-50/80 text-xs text-slate-700">
+          <td class="py-3 px-3 font-semibold text-slate-400">${index + 1}</td>
+          <td class="py-3 px-3">
+            <div class="font-bold text-slate-800">${l['રોકાણકારનું નામ'] || '-'}</div>
+            <div class="text-[11px] text-slate-400">${l['સબમિશન સમય'] || '-'}</div>
+          </td>
+          <td class="py-3 px-3 font-medium">${l['મોબાઈલ નંબર'] || '-'}</td>
+          <td class="py-3 px-3">
+            <span class="inline-block px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-semibold">${l['પસંદ કરેલ લક્ષ્ય'] ? l['પસંદ કરેલ લક્ષ્ય'].split('(')[0] : '-'}</span>
+          </td>
+          <td class="py-3 px-3 font-semibold">${l['સમયગાળો'] || '-'}</td>
+          <td class="py-3 px-3 font-bold text-emerald-700">${l['જરૂરી માસિક SIP'] || '-'}</td>
+          <td class="py-3 px-3 font-bold text-slate-900">${l['લક્ષ્ય સમયે ભવિષ્યનું ફંડ'] || '-'}</td>
+        </tr>
+      `).join('');
+    }
+  }
+
+  if (modal) {
+    modal.classList.remove('hidden');
+    if (window.lucide) {
+      lucide.createIcons();
+    }
+  }
+}
+
+// Close Master Leads Modal
+function closeMasterLeadsModal() {
+  const modal = document.getElementById('masterLeadsModal');
+  if (modal) {
+    modal.classList.add('hidden');
+  }
+}
+
+// Format Indian Currency in Gujarati / Standard Style
+function formatINR(amount) {
+  if (isNaN(amount) || amount === null) return '₹ 0';
+  return '₹ ' + Math.round(amount).toLocaleString('en-IN');
+}
+
+// Convert numbers to Gujarati readable words
+function convertToGujaratiWords(amount) {
+  const num = Number(amount);
+  if (isNaN(num) || num <= 0) return '';
+  if (num >= 10000000) {
+    const cr = (num / 10000000).toFixed(2).replace(/\.00$/, '');
+    return `(આશરે ${cr} કરોડ રૂપિયા)`;
+  } else if (num >= 100000) {
+    const lakh = (num / 100000).toFixed(2).replace(/\.00$/, '');
+    return `(આશરે ${lakh} લાખ રૂપિયા)`;
+  } else if (num >= 1000) {
+    const thousand = (num / 1000).toFixed(1).replace(/\.0$/, '');
+    return `(આશરે ${thousand} હજાર રૂપિયા)`;
+  }
+  return `(₹ ${num.toLocaleString('en-IN')})`;
+}
+
+// When Goal Card is clicked
+function onGoalChange(goalName, defaultAmount, defaultYears) {
+  const targetAmountInput = document.getElementById('targetAmount');
+  const targetYearsInput = document.getElementById('targetYears');
+  
+  if (targetAmountInput && defaultAmount) {
+    targetAmountInput.value = defaultAmount;
+  }
+  if (targetYearsInput && defaultYears) {
+    targetYearsInput.value = defaultYears;
+  }
+
+  // Update goal card styles
+  document.querySelectorAll('.goal-card').forEach(card => {
+    const input = card.querySelector('input[type="radio"]');
+    const dot = card.querySelector('.radio-dot');
+    const inner = card.querySelector('.radio-inner');
+    if (input && input.checked) {
+      card.classList.add('active-selected', 'border-emerald-600', 'bg-emerald-50/40');
+      card.classList.remove('border-slate-200');
+      if (dot) {
+        dot.classList.add('border-emerald-600', 'bg-emerald-600');
+        dot.classList.remove('border-slate-300', 'bg-white');
+      }
+      if (inner) inner.classList.remove('hidden');
+    } else {
+      card.classList.remove('active-selected', 'border-emerald-600', 'bg-emerald-50/40');
+      card.classList.add('border-slate-200');
+      if (dot) {
+        dot.classList.remove('border-emerald-600', 'bg-emerald-600');
+        dot.classList.add('border-slate-300', 'bg-white');
+      }
+      if (inner) inner.classList.add('hidden');
+    }
+  });
+
+  updateCalculationPreview();
+  calculateAndShowSummary();
+}
+
+// When Goal Priority Level is changed
+function onPriorityChange() {
+  document.querySelectorAll('.priority-card').forEach(card => {
+    const input = card.querySelector('input[type="radio"]');
+    if (input && input.checked) {
+      card.classList.add('border-emerald-600', 'bg-emerald-50/40');
+      card.classList.remove('border-slate-200');
+    } else {
+      card.classList.remove('border-emerald-600', 'bg-emerald-50/40');
+      card.classList.add('border-slate-200');
+    }
+  });
+
+  calculateAndShowSummary();
+}
+
+// When Risk Profile is changed
+function updateRiskExpectedReturn(returnRate) {
+  currentExpectedReturn = returnRate;
+  
+  document.querySelectorAll('.risk-card').forEach(card => {
+    const input = card.querySelector('input[type="radio"]');
+    if (input && input.checked) {
+      card.classList.add('border-emerald-600', 'bg-emerald-50/50');
+      card.classList.remove('border-slate-200');
+    } else {
+      card.classList.remove('border-emerald-600', 'bg-emerald-50/50');
+      card.classList.add('border-slate-200');
+    }
+  });
+
+  updateCalculationPreview();
+  calculateAndShowSummary();
+}
+
+// Real-time input updates
+function updateCalculationPreview() {
+  const targetAmount = parseFloat(document.getElementById('targetAmount')?.value) || 0;
+  const targetYears = parseFloat(document.getElementById('targetYears')?.value) || 1;
+  
+  const wordsEl = document.getElementById('targetAmountWords');
+  if (wordsEl) {
+    wordsEl.textContent = `${formatINR(targetAmount)} ${convertToGujaratiWords(targetAmount)}`;
+  }
+
+  const monthsEl = document.getElementById('targetMonthsCount');
+  if (monthsEl) {
+    monthsEl.textContent = `${Math.round(targetYears * 12)}`;
+  }
+}
+
+// Main Calculation Function
+function calculateAndShowSummary() {
+  const fullName = document.getElementById('fullName')?.value || 'સન્માનનીય રોકાણકાર';
+  const phone = document.getElementById('phone')?.value || '-';
+  const targetAmountToday = parseFloat(document.getElementById('targetAmount')?.value) || 0;
+  const targetYears = parseFloat(document.getElementById('targetYears')?.value) || 1;
+  const currentSavings = parseFloat(document.getElementById('currentSavings')?.value) || 0;
+  const monthlyBudget = parseFloat(document.getElementById('monthlyBudget')?.value) || 0;
+  const includeInflation = document.getElementById('includeInflation')?.checked ?? true;
+
+  // Selected goal
+  const selectedGoalRadio = document.querySelector('input[name="primaryGoal"]:checked');
+  const goalText = selectedGoalRadio ? selectedGoalRadio.value : 'નાણાકીય લક્ષ્ય';
+  const cleanGoalName = goalText.split('(')[0].trim();
+
+  // Inflation adjusted future target amount
+  const inflationRate = includeInflation ? 0.06 : 0.0;
+  const futureTargetCorpus = targetAmountToday * Math.pow(1 + inflationRate, targetYears);
+
+  // Future value of existing savings
+  const annualReturnDecimal = currentExpectedReturn / 100;
+  const monthlyReturnDecimal = annualReturnDecimal / 12;
+  const totalMonths = Math.max(1, Math.round(targetYears * 12));
+
+  const futureValueOfSavings = currentSavings * Math.pow(1 + annualReturnDecimal, targetYears);
+  
+  // Net corpus gap to be built via SIP
+  const netCorpusGap = Math.max(0, futureTargetCorpus - futureValueOfSavings);
+
+  // Monthly SIP Calculation Formula:
+  // FV = P * [((1 + r)^n - 1) / r] * (1 + r)
+  // => P = FV * r / [ ((1 + r)^n - 1) * (1 + r) ]
+  let requiredMonthlySIP = 0;
+  if (netCorpusGap > 0 && monthlyReturnDecimal > 0) {
+    const compoundFactor = Math.pow(1 + monthlyReturnDecimal, totalMonths);
+    const denominator = (compoundFactor - 1) * (1 + monthlyReturnDecimal);
+    requiredMonthlySIP = (netCorpusGap * monthlyReturnDecimal) / denominator;
+  }
+
+  // Total investment & gains
+  const totalSIPInvested = requiredMonthlySIP * totalMonths;
+  const totalInvestedOverall = totalSIPInvested + currentSavings;
+  const estimatedReturnsOverall = Math.max(0, futureTargetCorpus - totalInvestedOverall);
+
+  // Update DOM Summary Section
+  document.getElementById('resInvestorName').textContent = fullName;
+  document.getElementById('resInvestorContact').textContent = `મો: ${phone}`;
+  document.getElementById('resGoalName').textContent = cleanGoalName;
+  document.getElementById('resGoalHorizon').textContent = `સમયગાળો: ${targetYears} વર્ષ (${totalMonths} મહિના)`;
+  
+  // Goal Priority
+  const selectedPriorityRadio = document.querySelector('input[name="goalPriority"]:checked');
+  const priorityBadgeEl = document.getElementById('resGoalPriorityBadge');
+  if (priorityBadgeEl && selectedPriorityRadio) {
+    const priorityVal = selectedPriorityRadio.value;
+    if (priorityVal.includes('High')) {
+      priorityBadgeEl.className = 'text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800';
+      priorityBadgeEl.textContent = '🥇 ઉચ્ચ પ્રાથમિકતા';
+    } else if (priorityVal.includes('Medium')) {
+      priorityBadgeEl.className = 'text-[11px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800';
+      priorityBadgeEl.textContent = '🥈 મધ્યમ પ્રાથમિકતા';
+    } else {
+      priorityBadgeEl.className = 'text-[11px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700';
+      priorityBadgeEl.textContent = '🥉 સામાન્ય પ્રાથમિકતા';
+    }
+  }
+  
+  document.getElementById('resFutureTargetAmount').textContent = formatINR(futureTargetCorpus);
+  document.getElementById('resInflationStatus').textContent = includeInflation 
+    ? '(૬% વાર્ષિક મોંઘવારી સાથે)' 
+    : '(મોંઘવારી વગર ગણતરી)';
+
+  document.getElementById('resRequiredMonthlySIP').textContent = `${formatINR(requiredMonthlySIP)} / મહિને`;
+  document.getElementById('resReturnRateText').textContent = `અંદાજિત ${currentExpectedReturn}% વાર્ષિક વળતર આધારે`;
+
+  document.getElementById('resTotalInvestmentAmount').textContent = formatINR(totalSIPInvested);
+  document.getElementById('resEstimatedReturns').textContent = formatINR(estimatedReturnsOverall);
+  document.getElementById('resTotalMaturityCorpus').textContent = formatINR(futureTargetCorpus);
+  
+  document.getElementById('resCurrentCapacity').textContent = formatINR(monthlyBudget);
+  
+  // Budget Gap analysis
+  const budgetGapEl = document.getElementById('resBudgetGapBadge');
+  if (budgetGapEl) {
+    const diff = requiredMonthlySIP - monthlyBudget;
+    if (diff <= 0) {
+      budgetGapEl.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30';
+      budgetGapEl.textContent = 'ઉત્તમ! તમારી માસિક ક્ષમતા આ લક્ષ્ય માટે પૂરતી છે.';
+    } else {
+      budgetGapEl.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-400/30';
+      budgetGapEl.textContent = `અંદાજિત ${formatINR(diff)} વધારાના માસિક રોકાણની જરૂર છે (અથવા સ્ટેપ-અપ SIP અપનાવો)`;
+    }
+  }
+
+  // Update date badge
+  const today = new Date();
+  const dateStr = today.toLocaleDateString('gu-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const dateBadge = document.getElementById('reportDateBadge');
+  if (dateBadge) {
+    dateBadge.textContent = `તારીખ: ${dateStr}`;
+  }
+
+  const signName = document.getElementById('resSignName');
+  if (signName) {
+    signName.textContent = fullName;
+  }
+
+  // Refresh icons
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+}
+
+// Reset Function
+function resetAllFields() {
+  if (localStorage.getItem('goal_form_user_submitted') === 'true') {
+    alert('🔒 આ ફોર્મ પહેલેથી જ સબમિટ થયેલું છે. નવા રોકાણકાર માટે ફોર્મ ભરવા માટે એડવાઇઝર ટૂલબાર (Ctrl + Shift + M) માંથી અનલોક કરો.');
+    return;
+  }
+  if (confirm('શું તમે ફોર્મની તમામ વિગતો ફરીથી નવી ભરવા માંગો છો?')) {
+    document.getElementById('goalInvestmentForm').reset();
+    currentExpectedReturn = 12;
+    updateCalculationPreview();
+    calculateAndShowSummary();
+  }
+}
