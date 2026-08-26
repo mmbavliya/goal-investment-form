@@ -9,6 +9,9 @@ document.addEventListener('DOMContentLoaded', () => {
   if (window.lucide) {
     lucide.createIcons();
   }
+  syncGoalCardStyles();
+  syncPriorityCardStyles();
+  syncRiskCardStyles();
   updateCalculationPreview();
   calculateAndShowSummary();
   checkOneTimeSubmissionStatus();
@@ -37,7 +40,11 @@ function checkOneTimeSubmissionStatus() {
 function onInvestorDetailsInput() {
   const fullName = document.getElementById('fullName')?.value?.trim() || '';
   const phone = document.getElementById('phone')?.value?.trim().replace(/\D/g, '') || '';
+  const ageInput = document.getElementById('age')?.value?.trim();
+  const ageVal = ageInput ? parseInt(ageInput, 10) : null;
   const isSubmitted = localStorage.getItem('goal_form_user_submitted') === 'true';
+
+  calculateAndShowSummary();
 
   if (isSubmitted) return;
 
@@ -48,9 +55,10 @@ function onInvestorDetailsInput() {
   const lockNoticeSub = document.getElementById('lockNoticeSub');
   const lockNoticeBadge = document.getElementById('lockNoticeBadge');
 
-  const isValid = fullName.length >= 2 && phone.length === 10;
+  const isAgeValid = ageVal === null || (ageVal >= 18 && ageVal <= 100);
+  const isValid = fullName.length >= 2 && phone.length === 10 && (ageVal ? ageVal >= 18 : true);
 
-  if (isValid) {
+  if (isValid && isAgeValid) {
     // Unlock sections 2-4
     if (gatedSection) {
       gatedSection.classList.remove('opacity-40', 'pointer-events-none', 'select-none');
@@ -88,11 +96,15 @@ function onInvestorDetailsInput() {
       lockNoticeTitle.textContent = 'ગોલ પસંદગી અને SIP કેલ્ક્યુલેટર લૉક છે 🔒';
     }
     if (lockNoticeSub) {
-      lockNoticeSub.innerHTML = 'આગળ વધવા માટે કૃપા કરીને ઉપર <strong>વિભાગ ૧</strong> માં તમારું <strong>પૂરું નામ</strong> અને <strong>૧૦ આંકડાનો મોબાઈલ નંબર</strong> દાખલ કરો.';
+      if (ageVal !== null && ageVal < 18) {
+        lockNoticeSub.innerHTML = '⚠️ <strong>ઉંમર ઓછામાં ઓછી ૧૮ વર્ષ હોવી જરૂરી છે.</strong> કૃપા કરીને સાચી ઉંમર દાખલ કરો.';
+      } else {
+        lockNoticeSub.innerHTML = 'આગળ વધવા માટે કૃપા કરીને ઉપર <strong>વિભાગ ૧</strong> માં તમારું <strong>પૂરું નામ</strong> અને <strong>૧૦ આંકડાનો મોબાઈલ નંબર</strong> દાખલ કરો.';
+      }
     }
     if (lockNoticeBadge) {
       lockNoticeBadge.className = 'text-xs font-bold px-3 py-1 rounded-full bg-amber-200/80 text-amber-800 border border-amber-300 shrink-0';
-      lockNoticeBadge.textContent = 'વિભાગ ૧ જરૂરી છે';
+      lockNoticeBadge.textContent = (ageVal !== null && ageVal < 18) ? 'ઉંમર ૧૮+ જરૂરી' : 'વિભાગ ૧ જરૂરી છે';
     }
   }
 
@@ -186,6 +198,9 @@ function lockFormAsSubmitted(data = null) {
     resetBtn.classList.add('opacity-50', 'cursor-not-allowed');
   }
 
+  syncGoalCardStyles();
+  syncPriorityCardStyles();
+  syncRiskCardStyles();
   updateCalculationPreview();
   calculateAndShowSummary();
   if (window.lucide) {
@@ -250,6 +265,9 @@ function unlockFormForNewUser(promptConfirm = true) {
   }
 
   currentExpectedReturn = 12;
+  syncGoalCardStyles();
+  syncPriorityCardStyles();
+  syncRiskCardStyles();
   updateCalculationPreview();
   calculateAndShowSummary();
   onInvestorDetailsInput();
@@ -362,6 +380,11 @@ async function sendHiddenSubmission() {
 
 // Print Handler (Submits in background only if not already submitted, before printing)
 function handlePrintReport() {
+  calculateAndShowSummary();
+  const summaryEl = document.getElementById('summaryReportSection');
+  if (summaryEl) {
+    summaryEl.classList.remove('hidden');
+  }
   const isSubmitted = localStorage.getItem('goal_form_user_submitted') === 'true';
   if (!isSubmitted) {
     sendHiddenSubmission();
@@ -386,6 +409,14 @@ function onFormSubmit() {
   if (phone && isPhoneNumberDuplicate(phone)) {
     alert(`⚠️ આ મોબાઈલ નંબર (${phone}) પરથી ફોર્મ પહેલેથી જ સબમિટ થયેલ છે!\n\nદરેક વપરાશકર્તા દીઠ માત્ર એક જ વાર ફોર્મ ભરી શકાય છે.`);
     scrollToSummaryReport();
+    return;
+  }
+
+  // Check 3: Is age at least 18 years?
+  const ageVal = parseInt(document.getElementById('age')?.value, 10);
+  if (isNaN(ageVal) || ageVal < 18) {
+    alert('⚠️ રોકાણકારની ઉંમર ઓછામાં ઓછી ૧૮ વર્ષ હોવી જરૂરી છે (Age must not be less than 18 years).');
+    document.getElementById('age')?.focus();
     return;
   }
 
@@ -666,19 +697,8 @@ function convertToGujaratiWords(amount) {
   return `(₹ ${num.toLocaleString('en-IN')})`;
 }
 
-// When Goal Card is clicked
-function onGoalChange(goalName, defaultAmount, defaultYears) {
-  const targetAmountInput = document.getElementById('targetAmount');
-  const targetYearsInput = document.getElementById('targetYears');
-  
-  if (targetAmountInput && defaultAmount) {
-    targetAmountInput.value = defaultAmount;
-  }
-  if (targetYearsInput && defaultYears) {
-    targetYearsInput.value = defaultYears;
-  }
-
-  // Update goal card styles
+// Sync Visual Card States
+function syncGoalCardStyles() {
   document.querySelectorAll('.goal-card').forEach(card => {
     const input = card.querySelector('input[type="radio"]');
     const dot = card.querySelector('.radio-dot');
@@ -701,13 +721,9 @@ function onGoalChange(goalName, defaultAmount, defaultYears) {
       if (inner) inner.classList.add('hidden');
     }
   });
-
-  updateCalculationPreview();
-  calculateAndShowSummary();
 }
 
-// When Goal Priority Level is changed
-function onPriorityChange() {
+function syncPriorityCardStyles() {
   document.querySelectorAll('.priority-card').forEach(card => {
     const input = card.querySelector('input[type="radio"]');
     if (input && input.checked) {
@@ -718,14 +734,9 @@ function onPriorityChange() {
       card.classList.add('border-slate-200');
     }
   });
-
-  calculateAndShowSummary();
 }
 
-// When Risk Profile is changed
-function updateRiskExpectedReturn(returnRate) {
-  currentExpectedReturn = returnRate;
-  
+function syncRiskCardStyles() {
   document.querySelectorAll('.risk-card').forEach(card => {
     const input = card.querySelector('input[type="radio"]');
     if (input && input.checked) {
@@ -736,7 +747,35 @@ function updateRiskExpectedReturn(returnRate) {
       card.classList.add('border-slate-200');
     }
   });
+}
 
+// When Goal Card is clicked
+function onGoalChange(goalName, defaultAmount, defaultYears) {
+  const targetAmountInput = document.getElementById('targetAmount');
+  const targetYearsInput = document.getElementById('targetYears');
+  
+  if (targetAmountInput && defaultAmount) {
+    targetAmountInput.value = defaultAmount;
+  }
+  if (targetYearsInput && defaultYears) {
+    targetYearsInput.value = defaultYears;
+  }
+
+  syncGoalCardStyles();
+  updateCalculationPreview();
+  calculateAndShowSummary();
+}
+
+// When Goal Priority Level is changed
+function onPriorityChange() {
+  syncPriorityCardStyles();
+  calculateAndShowSummary();
+}
+
+// When Risk Profile is changed
+function updateRiskExpectedReturn(returnRate) {
+  currentExpectedReturn = returnRate;
+  syncRiskCardStyles();
   updateCalculationPreview();
   calculateAndShowSummary();
 }
@@ -755,6 +794,8 @@ function updateCalculationPreview() {
   if (monthsEl) {
     monthsEl.textContent = `${Math.round(targetYears * 12)}`;
   }
+
+  calculateAndShowSummary();
 }
 
 // Main Calculation Function
