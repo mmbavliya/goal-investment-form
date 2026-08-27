@@ -40,6 +40,9 @@ function checkOneTimeSubmissionStatus() {
 function onInvestorDetailsInput() {
   const fullName = document.getElementById('fullName')?.value?.trim() || '';
   const phone = document.getElementById('phone')?.value?.trim().replace(/\D/g, '') || '';
+  const email = document.getElementById('email')?.value?.trim() || '';
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const isEmailValid = emailRegex.test(email);
   const ageInput = document.getElementById('age')?.value?.trim();
   const ageVal = ageInput ? parseInt(ageInput, 10) : null;
   const isSubmitted = localStorage.getItem('goal_form_user_submitted') === 'true';
@@ -56,7 +59,7 @@ function onInvestorDetailsInput() {
   const lockNoticeBadge = document.getElementById('lockNoticeBadge');
 
   const isAgeValid = ageVal === null || (ageVal >= 18 && ageVal <= 100);
-  const isValid = fullName.length >= 2 && phone.length === 10 && (ageVal ? ageVal >= 18 : true);
+  const isValid = fullName.length >= 2 && phone.length === 10 && isEmailValid && (ageVal ? ageVal >= 18 : true);
 
   if (isValid && isAgeValid) {
     // Unlock sections 2-4
@@ -98,8 +101,10 @@ function onInvestorDetailsInput() {
     if (lockNoticeSub) {
       if (ageVal !== null && ageVal < 18) {
         lockNoticeSub.innerHTML = '⚠️ <strong>ઉંમર ઓછામાં ઓછી ૧૮ વર્ષ હોવી જરૂરી છે.</strong> કૃપા કરીને સાચી ઉંમર દાખલ કરો.';
+      } else if (!isEmailValid && email.length > 0) {
+        lockNoticeSub.innerHTML = '⚠️ કૃપા કરીને સાચું <strong>ઈમેલ એડ્રેસ</strong> દાખલ કરો (દા.ત. name@example.com).';
       } else {
-        lockNoticeSub.innerHTML = 'આગળ વધવા માટે કૃપા કરીને ઉપર <strong>વિભાગ ૧</strong> માં તમારું <strong>પૂરું નામ</strong> અને <strong>૧૦ આંકડાનો મોબાઈલ નંબર</strong> દાખલ કરો.';
+        lockNoticeSub.innerHTML = 'આગળ વધવા માટે કૃપા કરીને ઉપર <strong>વિભાગ ૧</strong> માં તમારું <strong>પૂરું નામ</strong>, <strong>૧૦ આંકડાનો મોબાઈલ નંબર</strong> અને <strong>ઈમેલ એડ્રેસ</strong> દાખલ કરો.';
       }
     }
     if (lockNoticeBadge) {
@@ -417,6 +422,15 @@ function onFormSubmit() {
   if (isNaN(ageVal) || ageVal < 18) {
     alert('⚠️ રોકાણકારની ઉંમર ઓછામાં ઓછી ૧૮ વર્ષ હોવી જરૂરી છે (Age must not be less than 18 years).');
     document.getElementById('age')?.focus();
+    return;
+  }
+
+  // Check 4: Is Email valid?
+  const email = document.getElementById('email')?.value?.trim() || '';
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email || !emailRegex.test(email)) {
+    alert('⚠️ કૃપા કરીને સાચું ઈમેલ એડ્રેસ દાખલ કરો (દા.ત. name@example.com).');
+    document.getElementById('email')?.focus();
     return;
   }
 

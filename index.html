@@ -196,17 +196,17 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           <!-- Full Name -->
-          <div class="sm:col-span-2 lg:col-span-1">
+          <div>
             <label class="block text-sm font-semibold text-slate-700 mb-1.5" for="fullName">
               પૂરું નામ <span class="text-emerald-600">*</span>
-              <span class="block text-xs font-normal text-slate-400">Full Name (નામ, પિતા/પતિનું નામ અને અટક - ૩ શબ્દોમાં)</span>
+              <span class="block text-xs font-normal text-slate-400">Full Name (First, Middle, Surname)</span>
             </label>
             <div class="relative">
               <i data-lucide="user" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
-              <input type="text" id="fullName" required placeholder="દા.ત. રમેશભાઈ કે. પટેલ / રમેશભાઈ કાંતિભાઈ પટેલ" oninput="onInvestorDetailsInput()"
+              <input type="text" id="fullName" required placeholder="દા.ત. રમેશભાઈ કે. પટેલ (૩ શબ્દો)" oninput="onInvestorDetailsInput()"
                 class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm transition">
             </div>
-            <p class="text-xs text-slate-500 mt-1">પ્રથમ નામ, પિતા/પતિનું નામ (ટૂંકું કે પૂરું) અને અટક - કુલ ૩ શબ્દોમાં લખો.</p>
+            <p class="text-[11px] text-emerald-700 font-medium mt-1">💡 નામ, પિતા/પતિનું નામ (ટૂંકું/લાંબુ) અને અટક - ૩ શબ્દો</p>
           </div>
 
           <!-- Mobile Number -->
@@ -220,33 +220,35 @@
               <input type="tel" id="phone" required placeholder="98XXXXXXXX" pattern="[0-9]{10}" maxlength="10" oninput="onInvestorDetailsInput()"
                 class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm transition">
             </div>
+            <p class="text-[11px] text-slate-500 mt-1">💡 સંપર્ક માટે ૧૦ આંકડાનો મોબાઈલ નંબર</p>
           </div>
 
           <!-- Email Address -->
           <div>
             <label class="block text-sm font-semibold text-slate-700 mb-1.5" for="email">
-              ઈમેલ એડ્રેસ
-              <span class="block text-xs font-normal text-slate-400">Email Address (Optional)</span>
+              ઈમેલ એડ્રેસ <span class="text-emerald-600">*</span>
+              <span class="block text-xs font-normal text-slate-400">Email Address (ફરજિયાત - Mandatory)</span>
             </label>
             <div class="relative">
               <i data-lucide="mail" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
-              <input type="email" id="email" placeholder="investor@example.com"
+              <input type="email" id="email" required placeholder="investor@example.com" oninput="onInvestorDetailsInput()"
                 class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm transition">
             </div>
+            <p class="text-[11px] text-slate-500 mt-1">💡 રિપોર્ટ અને અપડેટ્સ મેળવવા માટે માન્ય ઈમેલ દાખલ કરો</p>
           </div>
 
           <!-- Age -->
           <div>
             <label class="block text-sm font-semibold text-slate-700 mb-1.5" for="age">
               ઉંમર (વર્ષ) <span class="text-emerald-600">*</span>
-              <span class="block text-xs font-normal text-slate-400">Age (૧૮ વર્ષ કે તેથી વધુ - Min 18 Years)</span>
+              <span class="block text-xs font-normal text-slate-400">Age (૧૮ વર્ષ કે તેથી વધુ - Min 18)</span>
             </label>
             <div class="relative">
               <i data-lucide="calendar" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
-              <input type="number" id="age" min="18" max="100" required placeholder="દા.ત. 35" oninput="onInvestorDetailsInput()"
+              <input type="number" id="age" min="18" max="100" required placeholder="દા.ત. 35 (૧૮ વર્ષથી વધુ)" oninput="onInvestorDetailsInput()"
                 class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm transition">
             </div>
-            <p class="text-xs text-slate-500 mt-1">ઓછામાં ઓછી ૧૮ વર્ષની ઉંમર હોવી જરૂરી છે (૧૮ વર્ષથી ઓછી નહીં).</p>
+            <p class="text-[11px] text-amber-700 font-medium mt-1">⚠️ ઉંમર ઓછામાં ઓછી ૧૮ વર્ષ હોવી જરૂરી છે</p>
           </div>
 
           <!-- Occupation -->
@@ -265,6 +267,7 @@
               <option value="નિવૃત્ત (Retired)">નિવૃત્ત (Retired)</option>
               <option value="અન્ય (Other)">અન્ય (Other)</option>
             </select>
+            <p class="text-[11px] text-slate-500 mt-1">💡 તમારો મુખ્ય વ્યવસાય પસંદ કરો</p>
           </div>
 
           <!-- Annual Income Range -->
@@ -281,6 +284,7 @@
               <option value="₹ 12 થી ₹ 25 લાખ (₹12 - ₹25 Lakhs)">₹ 12 થી ₹ 25 લાખ (₹12 - ₹25 Lakhs)</option>
               <option value="₹ 25 લાખથી વધુ (Above ₹25 Lakhs)">₹ 25 લાખથી વધુ (Above ₹25 Lakhs)</option>
             </select>
+            <p class="text-[11px] text-slate-500 mt-1">💡 અંદાજિત વાર્ષિક કમાણી સ્લેબ</p>
           </div>
         </div>
       </section>
