@@ -298,7 +298,7 @@
           <div>
             <h4 id="lockNoticeTitle" class="font-bold text-sm sm:text-base text-amber-900">ગોલ પસંદગી અને SIP કેલ્ક્યુલેટર લૉક છે 🔒</h4>
             <p id="lockNoticeSub" class="text-xs sm:text-sm text-amber-700 mt-0.5">
-              આગળ વધવા માટે કૃપા કરીને ઉપર <strong>વિભાગ ૧</strong> માં તમારું <strong>પૂરું નામ</strong> અને <strong>૧૦ આંકડાનો મોબાઈલ નંબર</strong> દાખલ કરો.
+              આગળ વધવા માટે કૃપા કરીને ઉપર <strong>વિભાગ ૧</strong> માં તમારું <strong>પૂરું નામ</strong>, <strong>૧૦ આંકડાનો મોબાઈલ નંબર</strong>, <strong>ઈમેલ એડ્રેસ</strong> અને <strong>ઉંમર (૧૮+)</strong> દાખલ કરો.
             </p>
           </div>
         </div>
@@ -845,7 +845,7 @@
   </footer>
 
   <!-- Master Leads & Excel Export Modal (No Print) -->
-  <div id="masterLeadsModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 no-print">
+  <div id="masterLeadsModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 no-print" onclick="if(event.target === this) closeMasterLeadsModal()">
     <div class="bg-white w-full max-w-5xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
       
       <!-- Modal Header -->

@@ -33,6 +33,6 @@
 
 કોઈપણ બ્રાઉઝરમાં `index.html` ફાઇલ ઓપન કરો:
 ```text
-C:\Users\M M BAVALIYA\.gemini\antigravity\scratch\gujarati-goal-investment-form\index.html
+C:\Users\M M BAVALIYA\OneDrive\Desktop\gujarati-goal-investment-form\index.html
 ```
 અથવા ફાઇલ પર રાઇટ ક્લિક કરીને **Open with Google Chrome / Microsoft Edge** પસંદ કરો.
