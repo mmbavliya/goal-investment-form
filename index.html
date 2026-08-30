@@ -68,27 +68,93 @@
       background-color: #f0fdf4;
       box-shadow: 0 4px 6px -1px rgb(16 185 129 / 0.1);
     }
+    @page {
+      size: A4 portrait;
+      margin: 8mm 10mm;
+    }
     @media print {
       * {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
-      .no-print {
+      .no-print,
+      #goalInvestmentForm,
+      header,
+      footer,
+      #alreadySubmittedBanner,
+      #calculatorLockNotice,
+      #masterLeadsModal {
         display: none !important;
       }
       .print-only {
         display: block !important;
       }
-      body {
+      html, body {
         background: #ffffff !important;
-        color: #000000 !important;
+        color: #0f172a !important;
         padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        font-size: 13px !important;
+      }
+      main {
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      #summaryReportSection {
+        display: block !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+      .report-card-container {
+        border: 2px solid #059669 !important;
+        border-radius: 16px !important;
+        padding: 20px 24px !important;
+        box-shadow: none !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+      .print-header {
+        padding-bottom: 12px !important;
+        border-bottom: 1.5px solid #e2e8f0 !important;
+      }
+      .print-snapshot-grid {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 10px !important;
+        margin-top: 14px !important;
+      }
+      .print-snapshot-card {
+        padding: 10px 12px !important;
+        border-radius: 10px !important;
+      }
+      .print-breakdown-box {
+        margin-top: 14px !important;
+        padding: 16px 20px !important;
+        border-radius: 14px !important;
+        background: #0f172a !important;
+        color: #ffffff !important;
+      }
+      .print-breakdown-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 12px !important;
+      }
+      .print-bottom-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 14px !important;
+        margin-top: 14px !important;
+      }
+      .print-bottom-card {
+        padding: 12px 16px !important;
+        border-radius: 12px !important;
       }
       .shadow-xl, .shadow-md, .shadow-sm, .shadow-lg {
         box-shadow: none !important;
-      }
-      .page-break {
-        page-break-before: always;
       }
     }
     .print-only {
@@ -180,7 +246,7 @@
         </div>
       </div>
     </div>
-    <form id="goalInvestmentForm" onsubmit="event.preventDefault(); onFormSubmit();" class="space-y-8">
+    <form id="goalInvestmentForm" onsubmit="event.preventDefault(); onFormSubmit();" class="space-y-8 no-print">
       
       <!-- વિભાગ ૧: રોકાણકારની મૂળભૂત વિગતો -->
       <section class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 sm:p-8 transition-all hover:shadow-md">
@@ -703,8 +769,8 @@
     <div id="summaryReportSection" class="hidden mt-12 space-y-6">
       
       <!-- Title Card -->
-      <div class="bg-white rounded-2xl shadow-lg border border-emerald-100 p-6 sm:p-8 overflow-hidden relative">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200">
+      <div class="bg-white rounded-2xl shadow-lg border border-emerald-100 p-6 sm:p-8 overflow-hidden relative report-card-container">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200 print-header">
           <div>
             <div class="flex items-center gap-2">
               <span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-md">ગોલ રિપોર્ટ</span>
@@ -720,14 +786,14 @@
         </div>
 
         <!-- Client & Goal Snapshot Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/70">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 print-snapshot-grid">
+          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/70 print-snapshot-card">
             <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">રોકાણકારનું નામ</span>
             <p class="font-bold text-slate-800 text-base" id="resInvestorName">રમેશભાઈ પટેલ</p>
             <span class="text-xs text-slate-500" id="resInvestorContact">મો: 9876543210</span>
           </div>
 
-          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/70">
+          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/70 print-snapshot-card">
             <div class="flex items-center justify-between mb-1">
               <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">પસંદ કરેલ લક્ષ્ય</span>
               <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800" id="resGoalPriorityBadge">🥇 ઉચ્ચ પ્રાથમિકતા</span>
@@ -736,13 +802,13 @@
             <span class="text-xs text-slate-500" id="resGoalHorizon">સમયગાળો: ૧૦ વર્ષ (૧૨૦ મહિના)</span>
           </div>
 
-          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/70">
+          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/70 print-snapshot-card">
             <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">લક્ષ્યની ભવિષ્યની રકમ</span>
             <p class="font-bold text-slate-900 text-base" id="resFutureTargetAmount">₹ 44,77,119</p>
             <span class="text-xs text-amber-700 font-medium" id="resInflationStatus">(૬% વાર્ષિક મોંઘવારી સાથે)</span>
           </div>
 
-          <div class="p-4 rounded-xl bg-emerald-50/80 border border-emerald-200">
+          <div class="p-4 rounded-xl bg-emerald-50/80 border border-emerald-200 print-snapshot-card">
             <span class="text-xs font-bold text-emerald-800 uppercase tracking-wider block mb-1">જરૂરી માસિક SIP</span>
             <p class="font-extrabold text-emerald-700 text-xl" id="resRequiredMonthlySIP">₹ 18,500 / મહિને</p>
             <span class="text-xs text-emerald-600 font-medium" id="resReturnRateText">અંદાજિત ૧૨% વળતર આધારે</span>
@@ -750,13 +816,13 @@
         </div>
 
         <!-- Detailed Financial Breakdown -->
-        <div class="mt-8 bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl p-6 sm:p-8">
+        <div class="mt-8 bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl p-6 sm:p-8 print-breakdown-box">
           <h4 class="text-lg font-bold mb-4 flex items-center gap-2">
             <i data-lucide="pie-chart" class="w-5 h-5 text-emerald-400"></i>
             <span>નાણાકીય ગણતરીનું વિશ્લેષણ (Financial Breakdown)</span>
           </h4>
 
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center sm:text-left">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center sm:text-left print-breakdown-grid">
             <div class="p-4 rounded-xl bg-white/5 border border-white/10">
               <span class="text-xs text-slate-300 block mb-1">તમારું કુલ અંદાજિત રોકાણ</span>
               <p class="text-xl font-bold text-white" id="resTotalInvestmentAmount">₹ 22,20,000</p>
@@ -789,9 +855,9 @@
         </div>
 
         <!-- Advisor Recommendation & Action Checklist -->
-        <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 print-bottom-grid">
           
-          <div class="p-5 rounded-xl border border-slate-200 bg-slate-50/60">
+          <div class="p-5 rounded-xl border border-slate-200 bg-slate-50/60 print-bottom-card">
             <h5 class="font-bold text-slate-800 text-sm flex items-center gap-2 mb-3">
               <i data-lucide="lightbulb" class="w-4 h-4 text-amber-500"></i>
               <span>નાણાકીય સલાહકારની મહત્વપૂર્ણ ભલામણો</span>
@@ -812,7 +878,7 @@
             </ul>
           </div>
 
-          <div class="p-5 rounded-xl border border-slate-200 bg-slate-50/60 flex flex-col justify-between">
+          <div class="p-5 rounded-xl border border-slate-200 bg-slate-50/60 flex flex-col justify-between print-bottom-card">
             <div>
               <h5 class="font-bold text-slate-800 text-sm flex items-center gap-2 mb-2">
                 <i data-lucide="shield-check" class="w-4 h-4 text-blue-500"></i>
@@ -829,6 +895,11 @@
             </div>
           </div>
 
+        </div>
+
+        <!-- Print Footer Note (1 line disclaimer) -->
+        <div class="mt-4 pt-3 border-t border-slate-200 text-center text-[10px] text-slate-400 print-only">
+          ગોલ આધારિત રોકાણ વિશ્લેષણ રિપોર્ટ | આ ગણતરી અંદાજિત વળતર પર આધારિત છે. મ્યુચ્યુઅલ ફંડ રોકાણ બજારના જોખમોને આધીન છે.
         </div>
 
       </div>
