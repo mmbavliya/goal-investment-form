@@ -179,8 +179,12 @@
       <div class="flex items-center gap-2">
         <span class="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-700/60 border border-emerald-400/30 text-emerald-200 text-xs font-semibold">
           <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-300"></i>
-          <span>૧ યુઝર દીઠ ૧ સબમિશન</span>
+          <span>૧ દિવસમાં ૧ ગોલ રિપોર્ટ (24h Cooldown)</span>
         </span>
+        <button type="button" onclick="openMasterLeadsModal()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-xs sm:text-sm font-medium transition border border-white/20" title="એડવાઇઝર ડેટાબેઝ (Ctrl + Shift + M)">
+          <i data-lucide="table-properties" class="w-4 h-4 text-emerald-300"></i>
+          <span class="hidden md:inline">માસ્ટર લીડ્સ</span>
+        </button>
         <button type="button" onclick="handlePrintReport()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-xs sm:text-sm font-medium transition border border-white/20">
           <i data-lucide="printer" class="w-4 h-4"></i>
           <span>પ્રિન્ટ / PDF</span>
@@ -202,8 +206,8 @@
             તમારા સપનાઓનું સચોટ નાણાકીય આયોજન
           </span>
           <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-white/15 border border-white/20 text-white">
-            <i data-lucide="lock" class="w-3 h-3 text-emerald-300"></i>
-            One-Time Submission Per User
+            <i data-lucide="clock" class="w-3 h-3 text-emerald-300"></i>
+            ૧ દિવસમાં ૧ સબમિશન • ૨૪ કલાક પછી પુનઃઉપયોગ
           </span>
         </div>
         <h2 class="text-2xl sm:text-3xl font-bold leading-snug">તમારા ભવિષ્યના સ્વપ્નોને સાકાર કરો.</h2>
@@ -217,24 +221,58 @@
   <!-- Main Form Container -->
   <main class="max-w-5xl mx-auto px-4 py-4 sm:py-6">
     
-    <!-- One-Time Use / Already Submitted Notice Banner (Shown when user has submitted) -->
-    <div id="alreadySubmittedBanner" class="hidden mb-6 p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-emerald-900 via-teal-900 to-slate-900 border-2 border-emerald-500/50 shadow-xl text-white no-print">
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div class="flex items-start sm:items-center gap-3.5">
+    <!-- Returning User Welcome Banner (Shown when returning user opens after 24h) -->
+    <div id="returningUserWelcomeBanner" class="hidden mb-6 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-700 to-emerald-800 text-white shadow-lg border border-emerald-400/40 no-print transition-all">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="p-2.5 bg-white/20 rounded-xl text-white shrink-0">
+            <i data-lucide="sparkles" class="w-5 h-5 text-yellow-300"></i>
+          </div>
+          <div>
+            <h4 class="font-bold text-sm sm:text-base text-white">🎉 સ્વાગત છે! નવો ગોલ રિપોર્ટ બનાવવા માટે ફોર્મ તૈયાર છે</h4>
+            <p class="text-xs sm:text-sm text-emerald-100 mt-0.5">
+              ૨૪ કલાક પૂર્ણ થયા બાદ તમે તમારા <strong>અન્ય નાણાકીય લક્ષ્ય (Second Goal)</strong> નું પ્લાનિંગ કરી શકો છો. તમારી વ્યક્તિગત માહિતી અગાઉ મુજબ ભરેલી છે.
+            </p>
+          </div>
+        </div>
+        <button type="button" onclick="document.getElementById('returningUserWelcomeBanner').classList.add('hidden')" class="p-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-white text-xs shrink-0 self-end sm:self-auto" title="બંધ કરો">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- 24-Hour Cooldown / Already Submitted Notice Banner (Shown during active cooldown) -->
+    <div id="alreadySubmittedBanner" class="hidden mb-6 p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-emerald-950 via-teal-950 to-slate-900 border-2 border-emerald-500/60 shadow-xl text-white no-print">
+      <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+        <div class="flex items-start gap-3.5">
           <div class="p-3 bg-emerald-500/20 rounded-xl border border-emerald-400/40 text-emerald-300 shrink-0">
             <i data-lucide="check-circle-2" class="w-6 h-6 text-emerald-400"></i>
           </div>
           <div>
             <div class="flex items-center gap-2 flex-wrap">
-              <h4 class="font-bold text-base sm:text-lg text-emerald-200">તમારું ફોર્મ સબમિટ થઈ ગયું છે (Response Recorded)</h4>
-              <span class="px-2 py-0.5 text-[11px] font-bold rounded-full bg-emerald-500/30 text-emerald-300 border border-emerald-400/30">૧ યુઝર દીઠ ૧ વખત ઉપયોગ</span>
+              <h4 class="font-bold text-base sm:text-lg text-emerald-200">તમારો આજનો ગોલ રિપોર્ટ સબમિટ થઈ ગયો છે (Response Saved)</h4>
+              <span class="px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-emerald-500/30 text-emerald-300 border border-emerald-400/40">૧ દિવસ = ૧ રિપોર્ટ</span>
             </div>
-            <p class="text-xs sm:text-sm text-slate-300 mt-1">
-              દરેક વપરાશકર્તા માટે માત્ર ૧ વખત જ સબમિશન માન્ય છે. તમારો ગોલ પ્લાનિંગ રિપોર્ટ નીચે તૈયાર છે.
+            <p class="text-xs sm:text-sm text-slate-300 mt-1 leading-relaxed">
+              ડુપ્લિકેટ ડેટા અટકાવવા માટે ફોર્મ ૨૪ કલાક માટે સુરક્ષિત છે. તમે <strong>૨૪ કલાક પછી તમારા અન્ય લક્ષ્ય (Second Goal)</strong> માટે આ જ લિંક પરથી નવો રિપોર્ટ બનાવી શકશો.
             </p>
+            
+            <!-- Live Countdown Bar -->
+            <div class="mt-3.5 p-3 rounded-xl bg-black/40 border border-emerald-400/30 flex flex-wrap items-center gap-3">
+              <div class="flex items-center gap-2 text-xs text-emerald-300 font-semibold">
+                <i data-lucide="clock" class="w-4 h-4 text-emerald-400 animate-pulse"></i>
+                <span>આગામી ગોલ રિપોર્ટ અનલૉક સમય:</span>
+              </div>
+              <span id="cooldownCountdownBadge" class="px-3 py-1 rounded-lg bg-emerald-500 text-slate-950 font-black text-xs sm:text-sm tracking-wide shadow">
+                ગણતરી ચાલુ છે...
+              </span>
+              <span class="text-[11px] text-slate-400">
+                (અનલૉક: <span id="cooldownUnlockTime" class="text-slate-200 font-medium">-</span>)
+              </span>
+            </div>
           </div>
         </div>
-        <div class="flex items-center gap-2 self-stretch sm:self-auto shrink-0">
+        <div class="flex items-center gap-2 self-stretch lg:self-auto shrink-0 mt-2 lg:mt-0">
           <button type="button" onclick="scrollToSummaryReport()" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center justify-center gap-1.5">
             <i data-lucide="file-text" class="w-4 h-4"></i>
             <span>રિપોર્ટ જુઓ</span>
@@ -912,6 +950,11 @@
     <div class="max-w-5xl mx-auto px-4 space-y-2">
       <p class="font-medium text-slate-300">ગોલ આધારિત રોકાણ પ્લાનિંગ ફોર્મ (Gujarati Goal-Based Investment Form)</p>
       <p class="text-slate-500">મ્યુચ્યુઅલ ફંડ અને ઇક્વિટી રોકાણ બજારના જોખમોને આધીન છે. રોકાણ કરતા પહેલા તમામ યોજના સંબંધિત દસ્તાવેજો કાળજીપૂર્વક વાંચો.</p>
+      <div class="pt-2">
+        <button type="button" onclick="openMasterLeadsModal()" class="text-emerald-400 hover:text-emerald-300 transition text-[11px] underline">
+          🔒 એડવાઇઝર પોર્ટલ / માસ્ટર લીડ્સ ડેટાબેઝ (Shortcut: Ctrl + Shift + M)
+        </button>
+      </div>
     </div>
   </footer>
 
@@ -942,7 +985,7 @@
           <span id="masterLeadsCount" class="text-xs font-bold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">0 રેકોર્ડ્સ</span>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-          <button type="button" onclick="unlockFormForNewUser()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-md transition" title="વન-ટાઇમ લિમિટ રીસેટ કરો અને નવા યુઝર માટે ફોર્મ ઓપન કરો">
+          <button type="button" onclick="unlockFormForNewUser()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-md transition" title="૨૪ કલાકની લિમિટ રીસેટ કરો અને નવા યુઝર માટે ફોર્મ અનલોક કરો">
             <i data-lucide="unlock" class="w-4 h-4"></i>
             <span>નવા યુઝર માટે ફોર્મ અનલોક કરો</span>
           </button>
@@ -957,6 +1000,10 @@
           <button type="button" onclick="copyLeadsForGoogleSheets()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-md transition">
             <i data-lucide="copy" class="w-4 h-4"></i>
             <span>Google Sheets માં પેસ્ટ કરો</span>
+          </button>
+          <button type="button" onclick="clearAllLeads()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md transition" title="તમામ ડેટાબેઝ ક્લીયર કરો">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+            <span>ક્લીયર લીડ્સ</span>
           </button>
           <a href="https://drive.google.com" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-medium text-xs transition">
             <i data-lucide="hard-drive" class="w-4 h-4 text-blue-600"></i>
@@ -977,6 +1024,7 @@
               <th class="py-2.5 px-3">સમયગાળો</th>
               <th class="py-2.5 px-3">જરૂરી SIP</th>
               <th class="py-2.5 px-3">ભવિષ્યનું ફંડ</th>
+              <th class="py-2.5 px-3 text-right">એક્શન</th>
             </tr>
           </thead>
           <tbody id="masterLeadsTableBody" class="divide-y divide-slate-100">
