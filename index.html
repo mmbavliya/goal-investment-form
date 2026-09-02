@@ -166,7 +166,7 @@
 
   <!-- Header / Navigation -->
   <header class="bg-gradient-to-r from-emerald-800 via-teal-800 to-cyan-900 text-white shadow-lg no-print sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto px-4 py-3.5 sm:px-6 flex items-center justify-between">
+    <div class="max-w-6xl mx-auto px-4 py-3.5 sm:px-6 flex items-center justify-between flex-wrap gap-2">
       <div class="flex items-center space-x-3 space-x-reverse">
         <div class="p-2.5 bg-emerald-500/20 rounded-xl border border-emerald-400/30 backdrop-blur-sm">
           <i data-lucide="target" class="w-6 h-6 text-emerald-300"></i>
@@ -177,17 +177,17 @@
         </div>
       </div>
       <div class="flex items-center gap-2">
-        <span class="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-700/60 border border-emerald-400/30 text-emerald-200 text-xs font-semibold">
-          <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-300"></i>
-          <span>૧ દિવસમાં ૧ ગોલ રિપોર્ટ (24h Cooldown)</span>
-        </span>
+        <a href="https://shree151.blogspot.com/" class="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-2 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs sm:text-sm shadow-md transition hover:scale-105" title="Shree151 બ્લોગ પર પાછા જાઓ">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          <span>Back to Shree151 Blog</span>
+        </a>
         <button type="button" onclick="openMasterLeadsModal()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-xs sm:text-sm font-medium transition border border-white/20" title="એડવાઇઝર ડેટાબેઝ (Ctrl + Shift + M)">
           <i data-lucide="table-properties" class="w-4 h-4 text-emerald-300"></i>
           <span class="hidden md:inline">માસ્ટર લીડ્સ</span>
         </button>
         <button type="button" onclick="handlePrintReport()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-xs sm:text-sm font-medium transition border border-white/20">
           <i data-lucide="printer" class="w-4 h-4"></i>
-          <span>પ્રિન્ટ / PDF</span>
+          <span class="hidden sm:inline">પ્રિન્ટ / PDF</span>
         </button>
       </div>
     </div>
@@ -947,7 +947,13 @@
 
   <!-- Footer (No Print) -->
   <footer class="mt-12 py-8 bg-slate-900 text-slate-400 text-center text-xs no-print">
-    <div class="max-w-5xl mx-auto px-4 space-y-2">
+    <div class="max-w-5xl mx-auto px-4 space-y-3">
+      <div class="flex flex-wrap items-center justify-center gap-4 pb-3 border-b border-slate-800">
+        <a href="https://shree151.blogspot.com/" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 font-semibold text-xs border border-emerald-500/30 transition">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+          <span>મુખ્ય બ્લોગ: Shree151.blogspot.com</span>
+        </a>
+      </div>
       <p class="font-medium text-slate-300">ગોલ આધારિત રોકાણ પ્લાનિંગ ફોર્મ (Gujarati Goal-Based Investment Form)</p>
       <p class="text-slate-500">મ્યુચ્યુઅલ ફંડ અને ઇક્વિટી રોકાણ બજારના જોખમોને આધીન છે. રોકાણ કરતા પહેલા તમામ યોજના સંબંધિત દસ્તાવેજો કાળજીપૂર્વક વાંચો.</p>
       <div class="pt-2">
