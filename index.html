@@ -231,7 +231,7 @@
           <div>
             <h4 class="font-bold text-sm sm:text-base text-white">🎉 સ્વાગત છે! નવો ગોલ રિપોર્ટ બનાવવા માટે ફોર્મ તૈયાર છે</h4>
             <p class="text-xs sm:text-sm text-emerald-100 mt-0.5">
-              ૨૪ કલાક પૂર્ણ થયા બાદ તમે તમારા <strong>અન્ય નાણાકીય લક્ષ્ય (Second Goal)</strong> નું પ્લાનિંગ કરી શકો છો. તમારી વ્યક્તિગત માહિતી અગાઉ મુજબ ભરેલી છે.
+              ૨૪ કલાક પૂર્ણ થયા બાદ તમે તમારા <strong>અન્ય નાણાકીય લક્ષ્ય (Second Goal)</strong> નું પ્લાનિંગ કરી શકો છો. કૃપા કરીને વિભાગ ૧ માં વિગતો ભરી આગળ વધો.
             </p>
           </div>
         </div>
@@ -361,9 +361,10 @@
               વ્યવસાય / રોજગાર <span class="text-emerald-600">*</span>
               <span class="block text-xs font-normal text-slate-400">Occupation</span>
             </label>
-            <select id="occupation" required
+            <select id="occupation" required onchange="onInvestorDetailsInput()"
               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white transition">
-              <option value="નોકરી (Salaried - Private/Govt)" selected>નોકરી (Salaried - Private/Govt)</option>
+              <option value="" disabled selected>-- વ્યવસાય પસંદ કરો (Select Occupation) --</option>
+              <option value="નોકરી (Salaried - Private/Govt)">નોકરી (Salaried - Private/Govt)</option>
               <option value="વેપાર / ધંધો (Business / Trader)">વેપાર / ધંધો (Business / Trader)</option>
               <option value="પ્રોફેશનલ (Doctor, CA, Lawyer, etc.)">પ્રોફેશનલ (Doctor, CA, Lawyer, etc.)</option>
               <option value="ખેતી / એગ્રીકલ્ચર (Agriculture)">ખેતી / એગ્રીકલ્ચર (Agriculture)</option>
@@ -380,11 +381,12 @@
               વાર્ષિક આવક <span class="text-emerald-600">*</span>
               <span class="block text-xs font-normal text-slate-400">Annual Income Range</span>
             </label>
-            <select id="annualIncome" required
+            <select id="annualIncome" required onchange="onInvestorDetailsInput()"
               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white transition">
+              <option value="" disabled selected>-- વાર્ષિક આવક પસંદ કરો (Select Annual Income) --</option>
               <option value="₹ 3 લાખ સુધી (Up to ₹3 Lakhs)">₹ 3 લાખ સુધી (Up to ₹3 Lakhs)</option>
               <option value="₹ 3 થી ₹ 6 લાખ (₹3 - ₹6 Lakhs)">₹ 3 થી ₹ 6 લાખ (₹3 - ₹6 Lakhs)</option>
-              <option value="₹ 6 થી ₹ 12 લાખ (₹6 - ₹12 Lakhs)" selected>₹ 6 થી ₹ 12 લાખ (₹6 - ₹12 Lakhs)</option>
+              <option value="₹ 6 થી ₹ 12 લાખ (₹6 - ₹12 Lakhs)">₹ 6 થી ₹ 12 લાખ (₹6 - ₹12 Lakhs)</option>
               <option value="₹ 12 થી ₹ 25 લાખ (₹12 - ₹25 Lakhs)">₹ 12 થી ₹ 25 લાખ (₹12 - ₹25 Lakhs)</option>
               <option value="₹ 25 લાખથી વધુ (Above ₹25 Lakhs)">₹ 25 લાખથી વધુ (Above ₹25 Lakhs)</option>
             </select>

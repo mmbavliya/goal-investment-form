@@ -160,21 +160,34 @@ function unlockFormForNextGoalAuto() {
     resetBtn.classList.remove('opacity-50', 'cursor-not-allowed');
   }
 
-  // Smart Prefill: Populate Section 1 contact info from saved profile
-  const savedProfile = JSON.parse(localStorage.getItem('goal_form_user_profile') || localStorage.getItem('goal_form_submitted_user') || 'null');
-  if (savedProfile) {
-    if (savedProfile.fullName && document.getElementById('fullName')) document.getElementById('fullName').value = savedProfile.fullName;
-    if (savedProfile.phone && document.getElementById('phone')) document.getElementById('phone').value = cleanPhoneNumber(savedProfile.phone);
-    if (savedProfile.email && document.getElementById('email')) document.getElementById('email').value = savedProfile.email;
-    if (savedProfile.age && document.getElementById('age')) document.getElementById('age').value = savedProfile.age;
-    if (savedProfile.occupation && document.getElementById('occupation')) document.getElementById('occupation').value = savedProfile.occupation;
-    if (savedProfile.annualIncome && document.getElementById('annualIncome')) document.getElementById('annualIncome').value = savedProfile.annualIncome;
-  }
+  // Keep Section 1 contact info blank for fresh entry
+  clearSection1Fields();
 
   onInvestorDetailsInput();
   if (window.lucide) {
     lucide.createIcons();
   }
+}
+
+// Helper: Ensure all data fields in Section 1 are kept completely blank
+function clearSection1Fields() {
+  const fullNameEl = document.getElementById('fullName');
+  if (fullNameEl) fullNameEl.value = '';
+
+  const phoneEl = document.getElementById('phone');
+  if (phoneEl) phoneEl.value = '';
+
+  const emailEl = document.getElementById('email');
+  if (emailEl) emailEl.value = '';
+
+  const ageEl = document.getElementById('age');
+  if (ageEl) ageEl.value = '';
+
+  const occupationEl = document.getElementById('occupation');
+  if (occupationEl) occupationEl.selectedIndex = 0;
+
+  const annualIncomeEl = document.getElementById('annualIncome');
+  if (annualIncomeEl) annualIncomeEl.selectedIndex = 0;
 }
 
 // Check and enforce 24-Hour Cooldown & One-Time per Day Submission
@@ -186,16 +199,8 @@ function checkOneTimeSubmissionStatus() {
   } else if (status.expired) {
     unlockFormForNextGoalAuto();
   } else {
-    // Prefill profile if returning user
-    const savedProfile = JSON.parse(localStorage.getItem('goal_form_user_profile') || 'null');
-    if (savedProfile) {
-      if (savedProfile.fullName && document.getElementById('fullName')) document.getElementById('fullName').value = savedProfile.fullName;
-      if (savedProfile.phone && document.getElementById('phone')) document.getElementById('phone').value = cleanPhoneNumber(savedProfile.phone);
-      if (savedProfile.email && document.getElementById('email')) document.getElementById('email').value = savedProfile.email;
-      if (savedProfile.age && document.getElementById('age')) document.getElementById('age').value = savedProfile.age;
-      if (savedProfile.occupation && document.getElementById('occupation')) document.getElementById('occupation').value = savedProfile.occupation;
-      if (savedProfile.annualIncome && document.getElementById('annualIncome')) document.getElementById('annualIncome').value = savedProfile.annualIncome;
-    }
+    // Keep Section 1 data fields blank for fresh entry
+    clearSection1Fields();
     onInvestorDetailsInput();
   }
 }
@@ -483,6 +488,7 @@ function unlockFormForNewUser(promptConfirm = true) {
       el.classList.remove('bg-slate-100', 'cursor-not-allowed', 'opacity-85');
     });
   }
+  clearSection1Fields();
 
   // Restore Submit Button
   const submitBtn = document.getElementById('submitFormBtn');
@@ -691,6 +697,22 @@ function onFormSubmit() {
   if (isNaN(ageVal) || ageVal < 18 || ageVal > 100) {
     alert('⚠️ રોકાણકારની ઉંમર ઓછામાં ઓછી ૧૮ વર્ષ અને વધુમાં વધુ ૧૦૦ વર્ષ હોવી જરૂરી છે.');
     document.getElementById('age')?.focus();
+    return;
+  }
+
+  // Check 4b: Is Occupation selected?
+  const occupation = document.getElementById('occupation')?.value?.trim() || '';
+  if (!occupation) {
+    alert('⚠️ કૃપા કરીને તમારો વ્યવસાય (Occupation) પસંદ કરો.');
+    document.getElementById('occupation')?.focus();
+    return;
+  }
+
+  // Check 4c: Is Annual Income selected?
+  const annualIncome = document.getElementById('annualIncome')?.value?.trim() || '';
+  if (!annualIncome) {
+    alert('⚠️ કૃપા કરીને તમારી વાર્ષિક આવક (Annual Income) પસંદ કરો.');
+    document.getElementById('annualIncome')?.focus();
     return;
   }
 
@@ -1346,6 +1368,7 @@ function resetAllFields() {
   if (confirm('શું તમે ફોર્મની તમામ વિગતો ફરીથી નવી ભરવા માંગો છો?')) {
     const form = document.getElementById('goalInvestmentForm');
     if (form) form.reset();
+    clearSection1Fields();
     currentExpectedReturn = 12;
     syncGoalCardStyles();
     syncPriorityCardStyles();
