@@ -1,5 +1,10 @@
 // Gujarati Goal-Based Investment Planner Application Logic
 
+// Purge any legacy profile saved in browser storage so Section 1 always stays blank
+try {
+  localStorage.removeItem('goal_form_user_profile');
+} catch (e) {}
+
 // Live Google Sheet / Google Drive Webhook URL (Direct sync to Master Investor Leads)
 let GOOGLE_SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbylQZGGfd5EyfHUf-4CMYAjsbDQMdXNcuv2-Il_93jpy6Uuhrc2p_BiYpZjtg3XGkIiVA/exec"; 
 
@@ -11,6 +16,9 @@ const COOLDOWN_MS = COOLDOWN_HOURS * 60 * 60 * 1000;
 let cooldownTimerInterval = null;
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Always ensure Section 1 fields start completely blank
+  clearSection1Fields();
+
   if (window.lucide) {
     lucide.createIcons();
   }
@@ -358,14 +366,11 @@ function lockFormAsSubmitted(data = null, unlockTime = null) {
     lockNotice.classList.add('hidden');
   }
 
-  // Populate saved data if available
+  // Always keep Section 1 contact fields completely blank as requested
+  clearSection1Fields();
+
+  // Populate saved goal & calculator data if available
   if (data) {
-    if (data.fullName && document.getElementById('fullName')) document.getElementById('fullName').value = data.fullName;
-    if (data.phone && document.getElementById('phone')) document.getElementById('phone').value = cleanPhoneNumber(data.phone);
-    if (data.email && document.getElementById('email')) document.getElementById('email').value = data.email;
-    if (data.age && document.getElementById('age')) document.getElementById('age').value = data.age;
-    if (data.occupation && document.getElementById('occupation')) document.getElementById('occupation').value = data.occupation;
-    if (data.annualIncome && document.getElementById('annualIncome')) document.getElementById('annualIncome').value = data.annualIncome;
     if (data.targetAmount && document.getElementById('targetAmount')) document.getElementById('targetAmount').value = data.targetAmount;
     if (data.targetYears && document.getElementById('targetYears')) document.getElementById('targetYears').value = data.targetYears;
     if (data.currentSavings && document.getElementById('currentSavings')) document.getElementById('currentSavings').value = data.currentSavings;
@@ -774,16 +779,6 @@ function onFormSubmit() {
   localStorage.setItem('goal_form_user_submitted', 'true');
   localStorage.setItem('goal_form_submitted_user', JSON.stringify(userSnapshot));
   
-  // Save investor profile to ease second goal creation after 24h
-  localStorage.setItem('goal_form_user_profile', JSON.stringify({
-    fullName: fullName,
-    phone: phone,
-    email: email,
-    age: ageVal,
-    occupation: userSnapshot.occupation,
-    annualIncome: userSnapshot.annualIncome
-  }));
-
   // Lock form for 24 hours
   lockFormAsSubmitted(userSnapshot, unlockTime);
   startCooldownTimer(unlockTime);

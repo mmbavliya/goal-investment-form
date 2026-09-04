@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>ગોલ આધારિત રોકાણ ફોર્મ | Goal-Based Investment Form</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -307,7 +310,7 @@
             </label>
             <div class="relative">
               <i data-lucide="user" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
-              <input type="text" id="fullName" required placeholder="દા.ત. રમેશભાઈ કે. પટેલ (૩ શબ્દો)" oninput="onInvestorDetailsInput()"
+              <input type="text" id="fullName" autocomplete="off" required placeholder="દા.ત. રમેશભાઈ કે. પટેલ (૩ શબ્દો)" oninput="onInvestorDetailsInput()"
                 class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm transition">
             </div>
             <p class="text-[11px] text-emerald-700 font-medium mt-1">💡 નામ, પિતા/પતિનું નામ (ટૂંકું/લાંબુ) અને અટક - ૩ શબ્દો</p>
@@ -321,7 +324,7 @@
             </label>
             <div class="relative">
               <i data-lucide="phone" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
-              <input type="tel" id="phone" required placeholder="98XXXXXXXX" pattern="[0-9]{10}" maxlength="10" oninput="onInvestorDetailsInput()"
+              <input type="tel" id="phone" autocomplete="off" required placeholder="98XXXXXXXX" pattern="[0-9]{10}" maxlength="10" oninput="onInvestorDetailsInput()"
                 class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm transition">
             </div>
             <p class="text-[11px] text-slate-500 mt-1">💡 સંપર્ક માટે ૧૦ આંકડાનો મોબાઈલ નંબર</p>
@@ -335,7 +338,7 @@
             </label>
             <div class="relative">
               <i data-lucide="mail" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
-              <input type="email" id="email" required placeholder="investor@example.com" oninput="onInvestorDetailsInput()"
+              <input type="email" id="email" autocomplete="off" required placeholder="investor@example.com" oninput="onInvestorDetailsInput()"
                 class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm transition">
             </div>
             <p class="text-[11px] text-slate-500 mt-1">💡 રિપોર્ટ અને અપડેટ્સ મેળવવા માટે માન્ય ઈમેલ દાખલ કરો</p>
@@ -349,7 +352,7 @@
             </label>
             <div class="relative">
               <i data-lucide="calendar" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
-              <input type="number" id="age" min="18" max="100" required placeholder="દા.ત. 35 (૧૮ વર્ષથી વધુ)" oninput="onInvestorDetailsInput()"
+              <input type="number" id="age" autocomplete="off" min="18" max="100" required placeholder="દા.ત. 35 (૧૮ વર્ષથી વધુ)" oninput="onInvestorDetailsInput()"
                 class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm transition">
             </div>
             <p class="text-[11px] text-amber-700 font-medium mt-1">⚠️ ઉંમર ઓછામાં ઓછી ૧૮ વર્ષ હોવી જરૂરી છે</p>
@@ -1052,6 +1055,6 @@
     </div>
   </div>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=2.1.0"></script>
 </body>
 </html>
