@@ -1374,4 +1374,409 @@ function resetAllFields() {
   }
 }
 
+// ==========================================
+// AI Goal Assistant Chatbot (Conversational Planner Engine)
+// ==========================================
+
+const botState = {
+  isOpen: false,
+  step: 'greeting', // 'greeting', 'ask_years', 'ask_cost', 'show_result'
+  currentGoal: {
+    name: 'બાળકનું શિક્ષણ',
+    goalValue: 'બાળકનું ઉચ્ચ શિક્ષણ (Higher Education)',
+    years: 10,
+    cost: 1000000,
+    inflation: 6,
+    returnRate: 12,
+    futureCorpus: 0,
+    requiredSIP: 0,
+    totalInvested: 0,
+    estimatedWealthGain: 0
+  }
+};
+
+// Toggle Chat Window
+function toggleAIChatbot() {
+  const windowEl = document.getElementById('aiChatbotWindow');
+  if (!windowEl) return;
+  
+  botState.isOpen = !botState.isOpen;
+  if (botState.isOpen) {
+    windowEl.classList.remove('hidden');
+    setTimeout(() => {
+      windowEl.classList.remove('scale-95', 'opacity-0');
+      windowEl.classList.add('scale-100', 'opacity-100');
+    }, 10);
+    
+    // Hide teaser
+    const teaser = document.getElementById('aiChatTeaserBadge');
+    if (teaser) teaser.style.display = 'none';
+
+    // If chat empty, start conversation
+    const messagesEl = document.getElementById('aiChatMessages');
+    if (messagesEl && messagesEl.children.length === 0) {
+      renderBotGreeting();
+    }
+  } else {
+    windowEl.classList.add('scale-95', 'opacity-0');
+    windowEl.classList.remove('scale-100', 'opacity-100');
+    setTimeout(() => {
+      windowEl.classList.add('hidden');
+    }, 250);
+  }
+}
+
+// Restart Chat
+function restartAIChatbot() {
+  const messagesEl = document.getElementById('aiChatMessages');
+  if (messagesEl) messagesEl.innerHTML = '';
+  botState.step = 'greeting';
+  renderBotGreeting();
+}
+
+// Append Assistant Message
+function appendBotMessage(htmlContent) {
+  const messagesEl = document.getElementById('aiChatMessages');
+  if (!messagesEl) return;
+
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'flex items-start gap-2.5 max-w-[94%]';
+  msgDiv.innerHTML = `
+    <div class="w-7 h-7 rounded-full bg-emerald-700 text-yellow-300 flex items-center justify-center shrink-0 shadow mt-0.5 border border-emerald-500/40">
+      <i data-lucide="bot" class="w-4 h-4"></i>
+    </div>
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl rounded-tl-none p-3.5 text-slate-100 shadow-md text-xs sm:text-sm leading-relaxed space-y-2">
+      ${htmlContent}
+    </div>
+  `;
+  messagesEl.appendChild(msgDiv);
+  if (window.lucide) lucide.createIcons();
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+// Append User Message
+function appendUserMessage(text) {
+  const messagesEl = document.getElementById('aiChatMessages');
+  if (!messagesEl) return;
+
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'flex items-start justify-end gap-2 max-w-[88%] ml-auto';
+  msgDiv.innerHTML = `
+    <div class="bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-2xl rounded-tr-none p-3 shadow-md text-xs sm:text-sm font-medium leading-relaxed">
+      ${text}
+    </div>
+    <div class="w-7 h-7 rounded-full bg-slate-800 text-emerald-400 flex items-center justify-center shrink-0 shadow mt-0.5 border border-slate-700">
+      <i data-lucide="user" class="w-4 h-4"></i>
+    </div>
+  `;
+  messagesEl.appendChild(msgDiv);
+  if (window.lucide) lucide.createIcons();
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+// Render Quick Chips
+function renderQuickChips(chips) {
+  const container = document.getElementById('aiChatQuickChips');
+  if (!container) return;
+  if (!chips || chips.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+  container.innerHTML = chips.map(c => `
+    <button type="button" onclick="handleBotChipClick('${c.type}', '${c.val.replace(/'/g, "\\'")}', '${c.label.replace(/'/g, "\\'")}')" 
+      class="px-3 py-1.5 rounded-full bg-slate-800 hover:bg-emerald-700/80 border border-slate-700 hover:border-emerald-500 text-emerald-300 hover:text-white text-[11px] font-medium whitespace-nowrap transition shadow-sm shrink-0">
+      ${c.label}
+    </button>
+  `).join('');
+}
+
+// Greeting Step
+function renderBotGreeting() {
+  appendBotMessage(`
+    <p class="font-bold text-emerald-300 text-sm">નમસ્તે! 🙏 હું તમારો AI ગોલ પ્લાનિંગ સહાયક છું.</p>
+    <p>તમારા ભવિષ્યના કયા નાણાકીય લક્ષ્ય માટે જરૂરી રોકાણ અને SIP ગણતરી કરવી છે? નીચેથી પસંદ કરો:</p>
+  `);
+  
+  renderQuickChips([
+    { type: 'goal', val: 'બાળકનું ઉચ્ચ શિક્ષણ (Higher Education)', label: '🎓 બાળકનું શિક્ષણ' },
+    { type: 'goal', val: 'નવું ઘર / ફ્લેટ ખરીદવો (Home Purchase)', label: '🏠 નવું ઘર / ફ્લેટ' },
+    { type: 'goal', val: 'બાળકના લગ્ન પ્રસંગ (Child Marriage)', label: '💍 લગ્ન પ્રસંગ' },
+    { type: 'goal', val: 'નિવૃત્તિ આયોજન (Retirement Planning)', label: '👴 નિવૃત્તિ ફંડ' },
+    { type: 'goal', val: 'સપનાની નવી કાર (Dream Car)', label: '🚗 નવી કાર' },
+    { type: 'goal', val: 'વેલ્થ ક્રિએશન / સામાન્ય સંપત્તિ નિર્માણ (Wealth Creation)', label: '💰 વેલ્થ ક્રિએશન' },
+    { type: 'faq', val: 'SIP એટલે શું?', label: '❓ SIP શું છે?' }
+  ]);
+  botState.step = 'greeting';
+}
+
+// Process Quick Chip Click
+function handleBotChipClick(type, val, label) {
+  if (type === 'goal') {
+    botState.currentGoal.goalValue = val;
+    botState.currentGoal.name = label;
+    appendUserMessage(label);
+    botState.step = 'ask_years';
+    
+    setTimeout(() => {
+      appendBotMessage(`
+        <p>ઉત્તમ પસંદગી! <strong>${label}</strong> માટે પ્લાનિંગ કરીએ.</p>
+        <p>આ લક્ષ્ય માટે <strong>કેટલા વર્ષ પછી</strong> નાણાંની જરૂર પડશે?</p>
+      `);
+      renderQuickChips([
+        { type: 'years', val: '3', label: '૩ વર્ષ' },
+        { type: 'years', val: '5', label: '૫ વર્ષ' },
+        { type: 'years', val: '10', label: '૧૦ વર્ષ' },
+        { type: 'years', val: '15', label: '૧૫ વર્ષ' },
+        { type: 'years', val: '20', label: '૨૦ વર્ષ' }
+      ]);
+    }, 300);
+  } else if (type === 'years') {
+    const yrs = parseInt(val, 10) || 5;
+    botState.currentGoal.years = yrs;
+    appendUserMessage(`${yrs} વર્ષ`);
+    botState.step = 'ask_cost';
+    
+    setTimeout(() => {
+      appendBotMessage(`
+        <p>લક્ષ્ય સમયગાળો: <strong>${yrs} વર્ષ</strong> નક્કી કર્યો.</p>
+        <p>આજના ભાવ પ્રમાણે આ લક્ષ્ય માટે <strong>અંદાજે કેટલો ખર્ચ થશે?</strong> (આજના મૂલ્યમાં)</p>
+      `);
+      renderQuickChips([
+        { type: 'cost', val: '500000', label: '₹ ૫ લાખ' },
+        { type: 'cost', val: '1000000', label: '₹ ૧૦ લાખ' },
+        { type: 'cost', val: '2500000', label: '₹ ૨૫ લાખ' },
+        { type: 'cost', val: '5000000', label: '₹ ૫૦ લાખ' },
+        { type: 'cost', val: '10000000', label: '₹ ૧ કરોડ' }
+      ]);
+    }, 300);
+  } else if (type === 'cost') {
+    const cost = parseFloat(val) || 1000000;
+    botState.currentGoal.cost = cost;
+    appendUserMessage(`₹ ${Number(cost).toLocaleString('en-IN')}`);
+    botState.step = 'show_result';
+    
+    setTimeout(() => {
+      calculateBotGoalResults();
+    }, 300);
+  } else if (type === 'faq') {
+    appendUserMessage(val);
+    processBotFAQ(val);
+  } else if (type === 'action') {
+    if (val === 'apply_form') {
+      applyBotDataToForm();
+    } else if (val === 'share_whatsapp') {
+      shareBotGoalOnWhatsApp();
+    } else if (val === 'restart') {
+      restartAIChatbot();
+    }
+  }
+}
+
+// Calculate and render interactive result card inside chat
+function calculateBotGoalResults() {
+  const g = botState.currentGoal;
+  const inflationRate = 0.06; // 6% standard
+  const returnRate = 0.12; // 12% equity return
+  const monthlyRate = returnRate / 12;
+  const totalMonths = Math.max(1, Math.round(g.years * 12));
+
+  // Future value adjusted for 6% inflation
+  const futureCorpus = g.cost * Math.pow(1 + inflationRate, g.years);
+  
+  // SIP formula: P = FV * r / [ ((1+r)^n - 1) * (1+r) ]
+  let requiredMonthlySIP = 0;
+  if (monthlyRate > 0) {
+    const compoundFactor = Math.pow(1 + monthlyRate, totalMonths);
+    const denominator = (compoundFactor - 1) * (1 + monthlyRate);
+    requiredMonthlySIP = (futureCorpus * monthlyRate) / denominator;
+  }
+
+  const totalInvested = requiredMonthlySIP * totalMonths;
+  const estimatedWealthGain = Math.max(0, futureCorpus - totalInvested);
+
+  g.futureCorpus = futureCorpus;
+  g.requiredSIP = requiredMonthlySIP;
+  g.totalInvested = totalInvested;
+  g.estimatedWealthGain = estimatedWealthGain;
+
+  appendBotMessage(`
+    <div class="space-y-3">
+      <div class="flex items-center justify-between border-b border-emerald-500/30 pb-2">
+        <span class="font-bold text-emerald-300 text-sm">🎯 તમારી ગોલ ગણતરી તૈયાર છે</span>
+        <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 font-semibold">${g.years} વર્ષ</span>
+      </div>
+      
+      <div class="space-y-2 text-xs">
+        <div class="flex justify-between items-center text-slate-300">
+          <span>આજનો અંદાજિત ખર્ચ:</span>
+          <span class="font-semibold text-white">₹ ${Math.round(g.cost).toLocaleString('en-IN')}</span>
+        </div>
+        <div class="flex justify-between items-center text-slate-300">
+          <span>ભવિષ્યનો ખર્ચ (૬% મોંઘવારી):</span>
+          <span class="font-bold text-emerald-300">₹ ${Math.round(futureCorpus).toLocaleString('en-IN')}</span>
+        </div>
+        <div class="p-2.5 rounded-xl bg-gradient-to-r from-emerald-900/70 to-teal-900/70 border border-emerald-400/40 text-center my-2 shadow">
+          <div class="text-[11px] text-emerald-200 font-medium">ભલામણ કરેલ માસિક SIP (૧૨% રિટર્ન):</div>
+          <div class="text-base sm:text-lg font-black text-yellow-300 mt-0.5">₹ ${Math.round(requiredMonthlySIP).toLocaleString('en-IN')} / મહિને</div>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-[11px] pt-1 border-t border-slate-800 text-slate-400">
+          <div>કુલ રોકાણ: <strong class="text-slate-200">₹ ${Math.round(totalInvested).toLocaleString('en-IN')}</strong></div>
+          <div>અંદાજિત નફો: <strong class="text-emerald-400">₹ ${Math.round(estimatedWealthGain).toLocaleString('en-IN')}</strong></div>
+        </div>
+      </div>
+
+      <div class="pt-2 flex flex-col gap-2">
+        <button type="button" onclick="applyBotDataToForm()" class="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5">
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <span>આ વિગત મુખ્ય ફોર્મમાં ભરો (Auto-Fill)</span>
+        </button>
+        <button type="button" onclick="shareBotGoalOnWhatsApp()" class="w-full py-1.5 px-3 rounded-xl bg-emerald-800/80 hover:bg-emerald-700 text-emerald-100 font-semibold text-xs border border-emerald-600/50 transition flex items-center justify-center gap-1.5">
+          <i data-lucide="share-2" class="w-3.5 h-3.5 text-emerald-300"></i>
+          <span>WhatsApp પર શેર કરો</span>
+        </button>
+      </div>
+    </div>
+  `);
+
+  renderQuickChips([
+    { type: 'action', val: 'apply_form', label: '⚡ ફોર્મમાં ભરો' },
+    { type: 'action', val: 'share_whatsapp', label: '📲 WhatsApp શેર' },
+    { type: 'action', val: 'restart', label: '🔄 નવો ગોલ ગણો' },
+    { type: 'faq', val: 'સ્ટેપ-અપ SIP શું છે?', label: '❓ સ્ટેપ-અપ SIP' }
+  ]);
+}
+
+// Auto-fill calculated bot values into main web form
+function applyBotDataToForm() {
+  const g = botState.currentGoal;
+  
+  // Set Target Amount
+  const targetAmountInput = document.getElementById('targetAmount');
+  if (targetAmountInput && g.cost) {
+    targetAmountInput.value = g.cost;
+  }
+  
+  // Set Target Years
+  const targetYearsInput = document.getElementById('targetYears');
+  if (targetYearsInput && g.years) {
+    targetYearsInput.value = g.years;
+  }
+
+  // Select Goal Radio
+  if (g.goalValue) {
+    const radio = document.querySelector(`input[name="primaryGoal"][value="${g.goalValue}"]`);
+    if (radio) {
+      radio.checked = true;
+    }
+  }
+
+  syncGoalCardStyles();
+  updateCalculationPreview();
+  calculateAndShowSummary();
+
+  appendBotMessage(`
+    <p class="text-emerald-300 font-bold">✅ મુખ્ય ફોર્મમાં તમામ વિગતો સફળતાપૂર્વક ભરાઈ ગઈ છે!</p>
+    <p>કૃપા કરીને ઉપર <strong>વિભાગ ૧</strong> માં તમારું નામ અને સંપર્ક નંબર ચેક કરી રિપોર્ટ જનરેટ કરો.</p>
+  `);
+
+  // Scroll to Form
+  const formSection = document.getElementById('goalInvestmentForm');
+  if (formSection) {
+    formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+// Share Bot Goal Summary to WhatsApp
+function shareBotGoalOnWhatsApp() {
+  const g = botState.currentGoal;
+  const text = `🎯 *મારું ગોલ આધારિત રોકાણ પ્લાનિંગ*\n\n` +
+    `• લક્ષ્ય: ${g.name || 'નાણાકીય લક્ષ્ય'}\n` +
+    `• સમયગાળો: ${g.years} વર્ષ\n` +
+    `• આજનો અંદાજિત ખર્ચ: ₹ ${Math.round(g.cost).toLocaleString('en-IN')}\n` +
+    `• ભવિષ્યનો અંદાજિત ખર્ચ (૬% મોંઘવારી): ₹ ${Math.round(g.futureCorpus).toLocaleString('en-IN')}\n` +
+    `• જરૂરી માસિક SIP (૧૨% રિટર્ન): *₹ ${Math.round(g.requiredSIP).toLocaleString('en-IN')} / મહિને*\n` +
+    `• અંદાજિત નફો/વળતર: ₹ ${Math.round(g.estimatedWealthGain).toLocaleString('en-IN')}\n\n` +
+    `તમારા ગોલનું પ્લાનિંગ કરવા માટે અહીં ક્લિક કરો: https://mmbavliya.github.io/goal-investment-form/`;
+
+  const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+  window.open(url, '_blank');
+}
+
+// Process Free-text Chat Submission
+function handleUserChatSubmit() {
+  const inputEl = document.getElementById('aiChatInput');
+  if (!inputEl) return;
+  const rawText = inputEl.value.trim();
+  if (!rawText) return;
+  inputEl.value = '';
+
+  appendUserMessage(rawText);
+
+  // Check if user entered a number/amount
+  const cleanNum = rawText.replace(/,/g, '').replace(/₹/g, '').trim();
+  const parsedAmt = parseFloat(cleanNum);
+
+  if (botState.step === 'ask_years' && !isNaN(parsedAmt) && parsedAmt > 0 && parsedAmt <= 60) {
+    handleBotChipClick('years', String(Math.round(parsedAmt)), `${Math.round(parsedAmt)} વર્ષ`);
+    return;
+  }
+
+  if (botState.step === 'ask_cost' && !isNaN(parsedAmt) && parsedAmt >= 1000) {
+    handleBotChipClick('cost', String(parsedAmt), `₹ ${parsedAmt.toLocaleString('en-IN')}`);
+    return;
+  }
+
+  // FAQ & Smart matching
+  setTimeout(() => {
+    processBotFAQ(rawText);
+  }, 350);
+}
+
+// Financial FAQ and Knowledge base
+function processBotFAQ(query) {
+  const q = query.toLowerCase();
+  
+  if (q.includes('sip') || q.includes('એસઆઈપી') || q.includes('systematic')) {
+    appendBotMessage(`
+      <p class="font-bold text-emerald-300">💡 SIP (Systematic Investment Plan) એટલે શું?</p>
+      <p>SIP એ મ્યુચ્યુઅલ ફંડમાં દર મહિને નિયમિત નિશ્ચિત રકમ (દા.ત. ₹૧,૦૦૦ કે ₹૫,૦૦૦) રોકાણ કરવાની શ્રેષ્ઠ પદ્ધતિ છે.</p>
+      <p class="text-[11px] text-slate-300">• <strong>Rupee Cost Averaging:</strong> બજાર વધે કે ઘટે ત્યારે આપમેળે એવરેજ કોસ્ટિંગ થાય છે.<br>• <strong>Power of Compounding:</strong> લાંબા ગાળે ચક્રવૃદ્ધિ વ્યાજનો જબરદસ્ત લાભ મળે છે.</p>
+    `);
+  } else if (q.includes('મોંઘવારી') || q.includes('inflation')) {
+    appendBotMessage(`
+      <p class="font-bold text-emerald-300">📈 મોંઘવારી (Inflation) ની અસર:</p>
+      <p>આજે જે વસ્તુ ₹૧૦ લાખમાં મળે છે, ૬% મોંઘવારી દરે તે ૧૦ વર્ષ પછી આશરે <strong>₹૧૭.૯૦ લાખ</strong> ની થઈ જશે. તેથી હંમેશા ભવિષ્યના મોંઘવારી દરને ધ્યાનમાં રાખીને જ રોકાણ કરવું જરૂરી છે.</p>
+    `);
+  } else if (q.includes('રિટર્ન') || q.includes('return') || q.includes('વળતર') || q.includes('profit')) {
+    appendBotMessage(`
+      <p class="font-bold text-emerald-300">📊 અંદાજિત વળતર (Returns):</p>
+      <p>• <strong>ઇક્વિટી મ્યુચ્યુઅલ ફંડ (૫+ વર્ષ):</strong> ૧૧% થી ૧૪% અંદાજિત ઐતિહાસિક વાર્ષિક વળતર.<br>• <strong>હાઇબ્રિડ / બેલેન્સ્ડ ફંડ:</strong> ૯% થી ૧૧%<br>• <strong>ડેટ / એફડી:</strong> ૬% થી ૭%</p>
+      <p class="text-[10px] text-slate-400">*(નોંધ: મ્યુચ્યુઅલ ફંડ બજારના જોખમોને આધીન છે).*</p>
+    `);
+  } else if (q.includes('સ્ટેપ') || q.includes('step') || q.includes('step-up')) {
+    appendBotMessage(`
+      <p class="font-bold text-emerald-300">🚀 સ્ટેપ-અપ (Step-Up) SIP:</p>
+      <p>તમારી વાર્ષિક આવક વધવાની સાથે દર વર્ષે SIP માં ૧૦% કે ૧૫% નો વધારો કરવો. આનાથી તમારા મોટા લક્ષ્યો ૫ વર્ષ વહેલા પૂર્ણ થઈ શકે છે!</p>
+    `);
+  } else if (q.includes('હેલો') || q.includes('hello') || q.includes('hi') || q.includes('નમસ્તે')) {
+    appendBotMessage(`
+      <p>નમસ્તે! 🙏 હું તમને કોઈપણ નાણાકીય લક્ષ્યનું ચોક્કસ SIP પ્લાનિંગ કરવામાં મદદ કરી શકું છું. નવું લક્ષ્ય ગણવા નીચેથી વિકલ્પ પસંદ કરો:</p>
+    `);
+    renderQuickChips([
+      { type: 'action', val: 'restart', label: '🎯 નવું લક્ષ્ય પ્લાન કરો' },
+      { type: 'faq', val: 'SIP એટલે શું?', label: '❓ SIP શું છે?' },
+      { type: 'faq', val: 'મોંઘવારી દર શું છે?', label: '📈 મોંઘવારીની અસર' }
+    ]);
+  } else {
+    appendBotMessage(`
+      <p>મેં તમારો પ્રશ્ન નોંધ્યો છે. તમે નીચે આપેલા વિકલ્પોમાંથી તમારા લક્ષ્યનું પ્લાનિંગ શરૂ કરી શકો છો:</p>
+    `);
+    renderQuickChips([
+      { type: 'action', val: 'restart', label: '🎯 નવું લક્ષ્ય ગણો' },
+      { type: 'faq', val: 'SIP એટલે શું?', label: '❓ SIP વિશે જાણો' },
+      { type: 'faq', val: 'અંદાજિત રિટર્ન કેટલું મળે?', label: '📊 વળતર વિશે જાણો' }
+    ]);
+  }
+}
+
 
