@@ -1400,13 +1400,12 @@ function toggleAIChatbot() {
   const windowEl = document.getElementById('aiChatbotWindow');
   if (!windowEl) return;
   
-  botState.isOpen = !botState.isOpen;
-  if (botState.isOpen) {
+  const isCurrentlyVisible = windowEl.style.display === 'flex' || (!windowEl.classList.contains('hidden') && windowEl.style.display !== 'none');
+  
+  if (!isCurrentlyVisible) {
+    windowEl.style.display = 'flex';
     windowEl.classList.remove('hidden');
-    setTimeout(() => {
-      windowEl.classList.remove('scale-95', 'opacity-0');
-      windowEl.classList.add('scale-100', 'opacity-100');
-    }, 10);
+    botState.isOpen = true;
     
     // Hide teaser
     const teaser = document.getElementById('aiChatTeaserBadge');
@@ -1418,13 +1417,12 @@ function toggleAIChatbot() {
       renderBotGreeting();
     }
   } else {
-    windowEl.classList.add('scale-95', 'opacity-0');
-    windowEl.classList.remove('scale-100', 'opacity-100');
-    setTimeout(() => {
-      windowEl.classList.add('hidden');
-    }, 250);
+    windowEl.style.display = 'none';
+    windowEl.classList.add('hidden');
+    botState.isOpen = false;
   }
 }
+window.toggleAIChatbot = toggleAIChatbot;
 
 // Restart Chat
 function restartAIChatbot() {
